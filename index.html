@@ -540,14 +540,7 @@ function loadProgress(){
   return true;
 }
 
-// Auto-load saved game on page load
-(function(){
-  if(loadProgress()){
-    document.getElementById('chat-panel').classList.remove('hidden','minimized');
-    document.getElementById('chat-body').innerHTML='';
-    showMathGate();
-  }
-})();
+// Auto-load moved to end of script
 
 // ==================== START GAME ====================
 function startGame(){
@@ -793,6 +786,13 @@ function showLeaderboard(){saveToLeaderboard();renderLB('lb-table-full',true);up
 
 // Update count on page load
 updatePlayerCount();
+
+// AUTO-LOAD SAVED GAME (runs last after everything is defined)
+if(loadProgress()){
+  document.getElementById('chat-panel').classList.remove('hidden','minimized');
+  document.getElementById('chat-body').innerHTML='';
+  showMathGate();
+}
 </script>
 </body>
 </html>
