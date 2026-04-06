@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.A.M. Academy - Best Friends Forever</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Quicksand',sans-serif;background:linear-gradient(135deg,#fce4ec,#f3e5f5,#e8eaf6);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;}
+  #game-container{width:880px;max-width:97vw;background:white;border-radius:24px;box-shadow:0 12px 40px rgba(0,0,0,.12);padding:28px;position:relative;overflow:hidden;margin:18px 0;}
+  h1{text-align:center;color:#ad1457;font-size:1.9em;margin-bottom:4px;}
+  h2{text-align:center;color:#7b1fa2;font-size:1.15em;margin-bottom:6px;}
+  .school-name{text-align:center;color:#f06292;font-size:.82em;letter-spacing:2px;margin-bottom:14px;font-weight:700;}
+  .subtitle{text-align:center;color:#888;margin-bottom:16px;font-size:.9em;}
+  .scene{display:none;animation:fadeIn .4s ease;}.scene.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  label{display:block;margin:10px 0 4px;color:#6a1b9a;font-weight:600;font-size:.93em;}
+  input[type="text"],input[type="number"],input[type="email"],input[type="password"]{padding:9px 14px;border:2px solid #e1bee7;border-radius:12px;font-size:1em;font-family:inherit;width:280px;text-align:center;outline:none;transition:border-color .3s;}
+  input:focus{border-color:#ab47bc;}
+  .pick-row{display:flex;justify-content:center;gap:9px;margin-top:6px;flex-wrap:wrap;}
+  .pick-btn{padding:7px 16px;border:2px solid #e1bee7;border-radius:12px;background:white;font-family:inherit;font-size:.9em;cursor:pointer;transition:all .22s;font-weight:600;color:#4a148c;}
+  .pick-btn:hover{background:#fce4ec;transform:scale(1.04);}
+  .pick-btn.selected{background:#f48fb1;color:white;border-color:#f48fb1;transform:scale(1.06);}
+  .color-dot{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .2s;}
+  .color-dot:hover{transform:scale(1.15);}.color-dot.selected{border-color:#6a1b9a;transform:scale(1.15);}
+  .hair-btn{padding:4px 11px;border:2px solid #e1bee7;border-radius:10px;background:white;font-size:1.3em;cursor:pointer;transition:all .2s;}
+  .hair-btn:hover{background:#fce4ec;}.hair-btn.selected{background:#ce93d8;border-color:#ab47bc;}
+  .avatar-preview{width:100px;height:100px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:50px;border:4px solid #e1bee7;background:#fce4ec;transition:all .3s;}
+  .elective-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:7px;max-width:700px;margin-left:auto;margin-right:auto;}
+  .elec-btn{padding:5px 11px;border:2px solid #e1bee7;border-radius:10px;background:white;font-family:inherit;font-size:.78em;cursor:pointer;transition:all .2s;color:#4a148c;font-weight:600;}
+  .elec-btn:hover{background:#fce4ec;}.elec-btn.selected{background:#ce93d8;color:white;border-color:#ab47bc;}.elec-btn.disabled{opacity:.35;cursor:not-allowed;}
+  .elec-count{text-align:center;font-size:.82em;color:#ab47bc;margin-top:5px;font-weight:600;}
+  .btn{display:inline-block;padding:12px 34px;background:linear-gradient(135deg,#ec407a,#ab47bc);color:white;border:none;border-radius:16px;font-size:1.02em;font-family:inherit;font-weight:700;cursor:pointer;margin-top:14px;transition:all .3s;box-shadow:0 4px 14px rgba(171,71,188,.35);}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(171,71,188,.5);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .btn-small{padding:8px 20px;font-size:.9em;margin-top:8px;}
+  .btn-danger{background:linear-gradient(135deg,#e53935,#c62828);}
+  .story-box{background:linear-gradient(135deg,#fce4ec,#f3e5f5);border-radius:14px;padding:18px;margin:12px 0;line-height:1.65;font-size:.98em;color:#4a148c;}
+  .speaker{font-weight:700;color:#ad1457;display:block;margin-bottom:3px;}
+  .speaker.leni{color:#7b1fa2;}.speaker.destiny{color:#e65100;}.speaker.andre{color:#1565c0;}.speaker.james{color:#2e7d32;}
+  .friendship-meter{margin:12px 0;text-align:center;}
+  .meter-label{font-weight:700;color:#ad1457;margin-bottom:4px;font-size:.9em;}
+  .meter-bar{width:100%;height:14px;background:#f3e5f5;border-radius:10px;overflow:hidden;}
+  .meter-fill{height:100%;background:linear-gradient(90deg,#f48fb1,#ce93d8,#ab47bc);border-radius:10px;transition:width .6s ease;}
+  .hearts{font-size:1.1em;margin-top:4px;}
+  .art-board{background:linear-gradient(135deg,#fff9c4,#fff3e0);border:3px solid #ffe082;border-radius:14px;padding:14px;margin:12px 0;text-align:center;}
+  .art-board-title{font-weight:700;color:#e65100;font-size:1em;margin-bottom:5px;}
+  .choices{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+  .choice-btn{padding:12px 16px;background:white;border:2px solid #e1bee7;border-radius:14px;font-family:inherit;font-size:.95em;cursor:pointer;text-align:left;transition:all .25s;color:#4a148c;}
+  .choice-btn:hover{background:#f8bbd0;border-color:#f48fb1;transform:translateX(5px);}
+  .section-divider{border:none;border-top:2px dashed #e1bee7;margin:16px 0;}
+  .math-box{background:linear-gradient(135deg,#e3f2fd,#e8eaf6);border:3px solid #90caf9;border-radius:16px;padding:24px;text-align:center;margin:16px 0;}
+  .math-question{font-size:1.8em;font-weight:700;color:#1565c0;margin:12px 0;}
+  .math-input{font-size:1.4em;width:120px;text-align:center;padding:10px;border:3px solid #90caf9;border-radius:12px;font-family:inherit;}
+  .math-input:focus{border-color:#1565c0;}
+  .math-result{font-size:1em;margin-top:8px;font-weight:600;min-height:24px;}
+  .math-correct{color:#2e7d32;}.math-wrong{color:#c62828;}
+  .leaderboard{background:linear-gradient(135deg,#fff9c4,#fff3e0);border:3px solid #ffe082;border-radius:16px;padding:18px;margin:14px 0;}
+  .leaderboard h3{color:#e65100;margin-bottom:10px;text-align:center;}
+  .lb-table{width:100%;border-collapse:collapse;}
+  .lb-table th{background:#ffe082;padding:8px;font-size:.85em;color:#e65100;border-radius:6px;}
+  .lb-table td{padding:7px;text-align:center;font-size:.9em;border-bottom:1px solid #ffe0b2;}
+  .lb-table tr.you{background:#fff3e0;font-weight:700;}
+  .chat-panel{position:fixed;bottom:0;right:20px;width:320px;max-width:90vw;background:white;border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.15);z-index:1000;display:flex;flex-direction:column;transition:transform .3s;}
+  .chat-panel.minimized{transform:translateY(calc(100% - 44px));}
+  .chat-panel.hidden{display:none;}
+  .chat-header{background:linear-gradient(135deg,#ec407a,#ab47bc);color:white;padding:10px 16px;border-radius:16px 16px 0 0;cursor:pointer;display:flex;justify-content:space-between;font-weight:700;font-size:.9em;}
+  .chat-body{height:280px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;}
+  .chat-msg{padding:8px 12px;border-radius:12px;font-size:.85em;max-width:85%;line-height:1.4;}
+  .chat-msg.them{background:#f3e5f5;align-self:flex-start;color:#4a148c;}
+  .chat-msg.you{background:#e3f2fd;align-self:flex-end;color:#1565c0;}
+  .chat-msg .chat-name{font-weight:700;font-size:.8em;margin-bottom:2px;}
+  .chat-input-row{display:flex;gap:6px;padding:10px;border-top:1px solid #e1bee7;}
+  .chat-input-row input{flex:1;padding:8px;border:2px solid #e1bee7;border-radius:10px;font-family:inherit;font-size:.88em;outline:none;}
+  .chat-input-row button{padding:8px 14px;background:#ab47bc;color:white;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;}
+  .admin-panel{background:linear-gradient(135deg,#fce4ec,#f3e5f5);border:2px solid #ce93d8;border-radius:14px;padding:18px;margin:14px 0;}
+  .admin-panel h3{color:#6a1b9a;margin-bottom:10px;}
+  .admin-row{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:.9em;color:#4a148c;}
+  .level-badge{display:inline-block;background:linear-gradient(135deg,#ec407a,#ab47bc);color:white;padding:4px 14px;border-radius:20px;font-weight:700;font-size:.95em;}
+  .player-card{background:linear-gradient(135deg,#fce4ec,#ede7f6);border-radius:12px;padding:12px;margin:10px 0;text-align:center;font-size:.88em;color:#4a148c;}
+  .player-card b{color:#ad1457;}
+  .warning-box{background:#fff3e0;border:2px solid #ff9800;border-radius:12px;padding:14px;margin:10px 0;color:#e65100;font-size:.9em;text-align:center;}
+  .success-box{background:#e8f5e9;border:2px solid #66bb6a;border-radius:12px;padding:14px;margin:10px 0;color:#2e7d32;font-size:.9em;text-align:center;}
+  .code-display{font-size:2em;letter-spacing:8px;font-weight:700;color:#1565c0;background:#e3f2fd;padding:16px;border-radius:12px;margin:10px 0;}
+  .brainrot{font-size:1.05em;font-weight:700;color:#e65100;text-align:center;margin:6px 0;}
+  .step-indicator{display:flex;justify-content:center;gap:8px;margin:14px 0;}
+  .step-dot{width:12px;height:12px;border-radius:50%;background:#e1bee7;}
+  .step-dot.active{background:#ab47bc;}.step-dot.done{background:#66bb6a;}
+  .rules-box{background:#f3e5f5;border:2px solid #ce93d8;border-radius:14px;padding:20px;margin:14px 0;font-size:.92em;color:#4a148c;line-height:1.8;max-height:350px;overflow-y:auto;}
+  .rules-box h3{color:#6a1b9a;margin-bottom:8px;}
+  .rules-box ul{margin-left:20px;}
+  .rules-box li{margin:4px 0;}
+  .checkbox-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0;font-weight:600;color:#6a1b9a;}
+  .checkbox-row input[type="checkbox"]{width:20px;height:20px;accent-color:#ab47bc;}
+  .loading-bar{width:100%;height:8px;background:#e1bee7;border-radius:8px;overflow:hidden;margin:10px 0;}
+  .loading-fill{height:100%;width:0;background:linear-gradient(90deg,#ec407a,#ab47bc);border-radius:8px;animation:loadAnim 3s ease forwards;}
+  @keyframes loadAnim{0%{width:0}50%{width:60%}80%{width:85%}100%{width:100%}}
+  .sparkle{position:absolute;font-size:18px;animation:sparkleFloat 2s ease-in-out infinite;pointer-events:none;}
+  @keyframes sparkleFloat{0%,100%{opacity:0;transform:translateY(0) scale(.5)}50%{opacity:1;transform:translateY(-18px) scale(1)}}
+  .shield{font-size:3em;text-align:center;margin:10px 0;}
+  .setup-step{background:#f3e5f5;border:2px solid #ce93d8;border-radius:14px;padding:16px;margin:12px 0;text-align:left;}
+  .setup-step h3{color:#6a1b9a;margin-bottom:8px;font-size:1.05em;}
+  .setup-step p{color:#4a148c;line-height:1.6;font-size:.92em;margin:4px 0;}
+  .setup-step .step-num{display:inline-block;background:#ab47bc;color:white;width:28px;height:28px;border-radius:50%;text-align:center;line-height:28px;font-weight:700;font-size:.9em;margin-right:8px;}
+  .setup-input{display:block;margin:8px auto;padding:10px 14px;border:2px solid #ce93d8;border-radius:12px;font-family:inherit;font-size:.95em;width:100%;max-width:400px;text-align:center;outline:none;}
+  .setup-input:focus{border-color:#6a1b9a;}
+  .setup-link{color:#1565c0;font-weight:700;text-decoration:underline;cursor:pointer;}
+  .setup-status{text-align:center;margin:10px 0;font-weight:600;min-height:22px;}
+  .setup-success{color:#2e7d32;}.setup-error{color:#c62828;}
+  .setup-img-hint{background:#fff3e0;border:2px solid #ffe082;border-radius:10px;padding:10px;margin:8px 0;font-size:.85em;color:#e65100;}
+  .setup-skip{font-size:.85em;color:#888;margin-top:10px;text-align:center;}
+  .setup-skip button{background:none;border:none;color:#ab47bc;font-family:inherit;font-weight:600;cursor:pointer;text-decoration:underline;font-size:.9em;}
+</style>
+</head>
+<body>
+<div id="game-container">
+
+<!-- PLAYER COUNT BAR -->
+<div id="player-count-bar" style="background:linear-gradient(135deg,#ec407a,#ab47bc);color:white;padding:8px 16px;border-radius:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:.85em;font-weight:600;">
+  <span>S.A.M. Academy</span>
+  <span id="player-count">0 / 25 players</span>
+</div>
+
+<!-- ==================== RULES ==================== -->
+<div id="scene-rules" class="scene active">
+  <h1>S.A.M. Academy</h1>
+  <h2>Smarts Arts Maths Academy</h2>
+  <div class="school-name">PRIVATE SCHOOL -- PRE-K THROUGH 12TH -- NO UNIFORMS</div>
+
+  <div style="background:#e8f5e9;border:2px solid #66bb6a;border-radius:12px;padding:12px;margin:10px 0;text-align:center;font-size:.9em;color:#2e7d32;">
+    🛡️ <b>Safe & Kid-Friendly</b> -- No violence, no ads, no in-app purchases, no data collection.<br>Parent/guardian approval required for players under 18.
+  </div>
+
+  <div class="rules-box" style="max-height:200px;">
+    <h3>Community Rules</h3>
+    <ul>
+      <li><b>Be Kind</b> -- No bullying or mean behavior</li>
+      <li><b>Safe for All Ages</b> -- School-appropriate content only</li>
+      <li><b>Privacy</b> -- We don't share or sell your info</li>
+      <li><b>No Personal Info in Chat</b> -- No addresses, phone numbers, or passwords</li>
+      <li><b>Under 18?</b> -- A parent/guardian must help you sign up</li>
+      <li><b>Problems?</b> -- Email <a href="mailto:leonbrill@gmail.com" style="color:#1565c0;">leonbrill@gmail.com</a></li>
+      <li><b>Have Fun!</b> 🎮</li>
+    </ul>
+  </div>
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="rules-check" onchange="document.getElementById('rules-btn').disabled=!this.checked">
+    <label for="rules-check" style="margin:0;cursor:pointer;">I have read and accept the rules</label>
+  </div>
+
+  <div style="text-align:center">
+    <button class="btn" id="rules-btn" onclick="acceptRules()" disabled>I Accept -- Let's Go!</button>
+    <button class="btn btn-danger btn-small" id="decline-btn" onclick="declineRules()" style="margin-left:10px;">I Decline</button>
+    <div id="rules-warning" style="margin-top:10px;font-weight:600;min-height:20px;"></div>
+  </div>
+</div>
+
+<!-- ==================== SIGN UP ==================== -->
+<div id="scene-signup" class="scene">
+  <h1>S.A.M. Academy</h1>
+  <h2>Sign Up</h2>
+  <div class="brainrot">lets get you in bestie 💅</div>
+
+  <div style="text-align:center">
+    <label>Your name:</label>
+    <input type="text" id="signup-name" placeholder="Your name" maxlength="20">
+
+    <label>Your age:</label>
+    <input type="number" id="player-real-age" min="5" max="99" placeholder="Age" style="width:120px;">
+
+    <div id="parent-approve-section" style="display:none;margin-top:10px;">
+      <div class="warning-box" style="padding:10px;font-size:.85em;">
+        <b>Parent/Guardian:</b> By clicking "Sign Up" you confirm you approve your child to play this game.
+      </div>
+    </div>
+
+    <br>
+    <button class="btn" id="signup-btn" onclick="completeSignup()" disabled>Sign Up 🎮</button>
+  </div>
+</div>
+
+<!-- ==================== WELCOME SCREEN ==================== -->
+<div id="scene-welcome" class="scene">
+  <h1>Welcome to S.A.M. Academy!</h1>
+  <div class="school-name">SMARTS ARTS MATHS ACADEMY</div>
+  <div class="shield">🎮🛡️🎮</div>
+
+  <div style="text-align:center">
+    <div class="story-box" style="font-size:1.1em;text-align:center;">
+      <b>Welcome to S.A.M. Academy!</b>
+      <br><br>
+      This website was made in 2026 by an 11 year old with ADHD and autism. 💜
+      <br><br>
+      <div style="background:#e3f2fd;border:2px solid #90caf9;border-radius:12px;padding:14px;margin-top:10px;">
+        <b>This is my channel:</b><br>
+        <a href="https://www.youtube.com/@sienaandfriends" target="_blank" style="color:#1565c0;font-weight:700;font-size:1.2em;">Siena and Friends on YouTube</a><br>
+        <span style="font-size:.9em;color:#6a1b9a;">Go subscribe! 💕</span>
+      </div>
+      <br>
+      Enjoy! 🎮💅
+      <br><br>
+      <div style="background:#f3e5f5;border:2px solid #ce93d8;border-radius:12px;padding:12px;margin-top:10px;font-size:.9em;">
+        If this website gave you any problems, email <a href="mailto:leonbrill@gmail.com" style="color:#1565c0;font-weight:700;">leonbrill@gmail.com</a>
+      </div>
+    </div>
+    <button class="btn" onclick="goToScene('scene-creator')">Create My Character! 🎨</button>
+  </div>
+</div>
+
+<!-- ==================== CHARACTER CREATOR ==================== -->
+<div id="scene-creator" class="scene">
+  <h1>Create Your Character</h1>
+  <div class="step-indicator"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div></div>
+  <div class="school-name">S.A.M. ACADEMY -- 5TH GRADE</div>
+  <div class="brainrot">you ate with this one bestie 💅 no cap on a stack</div>
+
+  <div style="text-align:center">
+    <div class="avatar-preview" id="avatar-preview">&#128566;</div>
+
+    <label>What's your name?</label>
+    <input type="text" id="player-name" placeholder="Type your name..." maxlength="16">
+
+    <label>Are you a girl or a boy?</label>
+    <div class="pick-row">
+      <button class="pick-btn" onclick="pick('gender','girl',this)">Girl</button>
+      <button class="pick-btn" onclick="pick('gender','boy',this)">Boy</button>
+    </div>
+
+    <label>How old is your character? (5th grade)</label>
+    <div class="pick-row">
+      <button class="pick-btn" onclick="pick('age',9,this)">9</button>
+      <button class="pick-btn" onclick="pick('age',10,this)">10</button>
+      <button class="pick-btn" onclick="pick('age',11,this)">11</button>
+      <button class="pick-btn" onclick="pick('age',12,this)">12</button>
+    </div>
+
+    <label>Personality?</label>
+    <div class="pick-row">
+      <button class="pick-btn" onclick="pick('personality','introvert',this)">Introvert (quiet era 🤫)</button>
+      <button class="pick-btn" onclick="pick('personality','extrovert',this)">Extrovert (main character energy 💅)</button>
+    </div>
+
+    <label>Skin color</label>
+    <div class="pick-row" id="skin-picker">
+      <div class="color-dot" style="background:#fde0c5" onclick="pickSkin(this,'#fde0c5')"></div>
+      <div class="color-dot" style="background:#f5c5a3" onclick="pickSkin(this,'#f5c5a3')"></div>
+      <div class="color-dot" style="background:#d4a373" onclick="pickSkin(this,'#d4a373')"></div>
+      <div class="color-dot" style="background:#a67c52" onclick="pickSkin(this,'#a67c52')"></div>
+      <div class="color-dot" style="background:#8b5e3c" onclick="pickSkin(this,'#8b5e3c')"></div>
+      <div class="color-dot" style="background:#5c3a1e" onclick="pickSkin(this,'#5c3a1e')"></div>
+    </div>
+
+    <label>Hair</label>
+    <div class="pick-row">
+      <button class="hair-btn" onclick="pickHair(this)">&#129521;</button>
+      <button class="hair-btn" onclick="pickHair(this)">&#128103;</button>
+      <button class="hair-btn" onclick="pickHair(this)">&#128102;</button>
+      <button class="hair-btn" onclick="pickHair(this)">&#128115;</button>
+      <button class="hair-btn" onclick="pickHair(this)">&#129528;</button>
+    </div>
+
+    <hr class="section-divider">
+    <label>Choose 2 electives (Leni is in Creative Arts btw she's GOATED 🐐):</label>
+    <div class="elective-grid" id="elective-grid"></div>
+    <div class="elec-count" id="elec-count">0 / 2 chosen</div>
+  </div>
+
+  <div style="text-align:center">
+    <button class="btn" id="start-btn" onclick="startGame()" disabled>Enter S.A.M. Academy! 🏫</button>
+  </div>
+</div>
+
+<!-- ==================== MATH GATE ==================== -->
+<div id="scene-math" class="scene">
+  <h2>Level <span id="math-level-num">1</span> -- Math Check! 🧠</h2>
+  <div class="brainrot" id="math-brainrot">this is giving... mathematician 📐</div>
+
+  <div class="math-box">
+    <p>Answer this to unlock Level <span id="math-level-num2">1</span>:</p>
+    <div class="math-question" id="math-question">?</div>
+    <input type="number" class="math-input" id="math-answer" placeholder="?" onkeydown="if(event.key==='Enter')checkMath()">
+    <div class="math-result" id="math-result"></div>
+    <br>
+    <button class="btn" onclick="checkMath()">Submit Answer 📝</button>
+  </div>
+
+  <div class="leaderboard" id="leaderboard-mini">
+    <h3>Leaderboard -- Highest Levels 🏆</h3>
+    <table class="lb-table" id="lb-table-mini"><thead><tr><th>Rank</th><th>Name</th><th>Level</th></tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<!-- ==================== MAIN GAME ==================== -->
+<div id="scene-game" class="scene">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div><span class="level-badge" id="level-badge">Level 1</span></div>
+    <div style="font-size:.85em;color:#6a1b9a;font-weight:600;" id="day-label">Monday</div>
+    <div>
+      <button class="btn btn-small" onclick="showAdminGate()" style="font-size:.78em;padding:6px 14px;">Admin 🔒</button>
+      <button class="btn btn-small" onclick="showLeaderboard()" style="font-size:.78em;padding:6px 14px;">Leaderboard 🏆</button>
+    </div>
+  </div>
+  <div class="player-card" id="game-player-card"></div>
+
+  <!-- REPORT CARD -->
+  <div id="report-card" style="background:linear-gradient(135deg,#e3f2fd,#e8eaf6);border:2px solid #90caf9;border-radius:14px;padding:12px;margin:10px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+      <span style="font-weight:700;color:#1565c0;font-size:.9em;">Report Card 📝</span>
+      <span id="grade-display" style="font-weight:700;font-size:.95em;"></span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center;" id="subjects-display"></div>
+    <div style="text-align:center;margin-top:4px;font-size:.8em;color:#1565c0;" id="grade-streak"></div>
+  </div>
+
+  <div class="friendship-meter">
+    <div class="meter-label">Friendship Level</div>
+    <div class="meter-bar"><div class="meter-fill" id="meter-game" style="width:10%"></div></div>
+    <div class="hearts" id="hearts-game"></div>
+  </div>
+  <div id="game-story"></div>
+  <div class="choices" id="game-choices"></div>
+</div>
+
+<!-- GAME OVER -->
+<div id="scene-gameover" class="scene">
+  <div style="text-align:center;padding:40px 20px;">
+    <h1 style="color:#c62828;font-size:2.2em;">GAME OVER 💀</h1>
+    <div class="brainrot">all F's?? that ain't it bestie 😭</div>
+    <div class="story-box" style="text-align:center;margin:20px 0;">
+      <span class="speaker">Narrator:</span>
+      <span id="gameover-name">You</span> got ALL F's on their report card. The principal of S.A.M. Academy called a meeting...
+      <br><br>
+      <span class="speaker destiny">Destiny:</span>
+      NOOO!! <span id="gameover-name2">bestie</span> got ALL F's?! this is NOT happening!! 😭
+      <br><br>
+      <span class="speaker leni">Leni:</span>
+      <em>*quietly crying*</em> ...we were supposed to graduate together...
+      <br><br>
+      <span class="speaker andre">Andre:</span>
+      bruh... even I don't have all F's... and I literally never do homework 💀
+    </div>
+    <p style="color:#6a1b9a;font-size:1.05em;margin:16px 0;">You have to start over and try harder in school this time!</p>
+    <button class="btn" onclick="restartAfterGameOver()">Try Again -- I'll Study This Time! 📚</button>
+  </div>
+</div>
+
+<!-- ADMIN GATE -->
+<div id="scene-admin-gate" class="scene">
+  <h2>Admin Panel 🔒</h2>
+  <div style="text-align:center">
+    <div class="warning-box">Enter the admin code to access the admin panel!</div>
+    <label>Admin Code:</label>
+    <input type="password" id="admin-code-input" placeholder="Enter code..." style="width:200px;" onkeydown="if(event.key==='Enter')checkAdminCode()">
+    <div id="admin-code-result" style="margin-top:8px;font-weight:600;min-height:20px;color:#c62828;"></div>
+    <br>
+    <button class="btn" onclick="checkAdminCode()">Enter</button>
+    <button class="btn btn-small" onclick="goToScene('scene-game');renderLevel()" style="background:#9e9e9e;">Back</button>
+    <p style="margin-top:12px;font-size:.8em;color:#999;">hint: 67 67 67 67 67 🤫</p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="scene-admin" class="scene">
+  <h2>Admin Panel ✅</h2>
+  <div class="brainrot">you're in the admin era now 💀 slay</div>
+  <div class="admin-panel">
+    <h3>Your Profile</h3><div id="admin-profile"></div>
+    <hr class="section-divider">
+    <h3>Game Stats</h3><div id="admin-stats"></div>
+    <hr class="section-divider">
+    <h3>Players Online</h3><div id="admin-players"></div>
+  </div>
+  <div style="text-align:center">
+    <button class="btn" onclick="goToScene('scene-game');renderLevel()">Back to Game</button>
+    <button class="btn btn-danger btn-small" onclick="resetGame()">Reset Game</button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="scene-leaderboard" class="scene">
+  <h2>S.A.M. Academy Leaderboard 🏆</h2>
+  <div class="brainrot">who's on top? 67 67 67 67 67 🗣️🔥</div>
+  <div class="leaderboard">
+    <h3>Highest Levels Reached</h3>
+    <table class="lb-table" id="lb-table-full"><thead><tr><th>Rank</th><th>Name</th><th>Level</th><th>Friendship</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div style="text-align:center">
+    <button class="btn" onclick="goToScene('scene-game');renderLevel()">Back to Game</button>
+  </div>
+</div>
+
+</div>
+
+<!-- CHAT -->
+<div class="chat-panel minimized hidden" id="chat-panel">
+  <div class="chat-header" onclick="toggleChat()">
+    <span>S.A.M. Chat 💬</span><span id="chat-toggle-icon">&#9650;</span>
+  </div>
+  <div class="chat-body" id="chat-body"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+// ==================== STATE ====================
+const player={name:'',gender:'',age:0,personality:'',skin:'',hairEmoji:'',electives:[]};
+let level=1,friendship=10,mathAnswer=0,useParentEmail=false;
+
+// ==================== GRADES & ADAPTIVE SYSTEM ====================
+const SUBJECTS=['Math','Reading','Science','Art','Social Studies'];
+let grades={Math:75,Reading:75,Science:75,Art:75,'Social Studies':75}; // start at C
+let mathStreak=0; // consecutive correct answers
+let mathWrong=0; // consecutive wrong answers
+let adaptiveDiff=1; // 1=easy, 2=medium, 3=hard -- adapts to player
+
+function getLetterGrade(score){
+  if(score>=90)return{letter:'A',color:'#2e7d32'};
+  if(score>=80)return{letter:'B',color:'#1565c0'};
+  if(score>=70)return{letter:'C',color:'#e65100'};
+  if(score>=60)return{letter:'D',color:'#c62828'};
+  return{letter:'F',color:'#b71c1c'};
+}
+
+function updateReportCard(){
+  const sd=document.getElementById('subjects-display');
+  if(!sd)return;
+  sd.innerHTML='';
+  let allF=true;
+  SUBJECTS.forEach(s=>{
+    const g=getLetterGrade(grades[s]);
+    if(g.letter!=='F')allF=false;
+    sd.innerHTML+=`<span style="background:white;border:2px solid ${g.color};border-radius:8px;padding:4px 10px;font-size:.82em;font-weight:700;color:${g.color};">${s}: ${g.letter}</span>`;
+  });
+  // Overall GPA
+  const avg=Object.values(grades).reduce((a,b)=>a+b,0)/SUBJECTS.length;
+  const overall=getLetterGrade(avg);
+  document.getElementById('grade-display').innerHTML=`Overall: <span style="color:${overall.color}">${overall.letter} (${Math.round(avg)}%)</span>`;
+  // Streak display
+  const gs=document.getElementById('grade-streak');
+  if(mathStreak>=3)gs.textContent='🔥 '+mathStreak+' correct in a row! Difficulty increasing!';
+  else if(mathWrong>=2)gs.textContent='📉 Struggling? Questions getting easier -- you got this!';
+  else gs.textContent='';
+
+  // CHECK FOR ALL F's = GAME OVER
+  if(allF){
+    setTimeout(()=>{
+      document.getElementById('gameover-name').textContent=player.name;
+      document.getElementById('gameover-name2').textContent=player.name;
+      goToScene('scene-gameover');
+    },500);
+  }
+}
+
+function restartAfterGameOver(){
+  level=1;friendship=10;mathStreak=0;mathWrong=0;adaptiveDiff=1;
+  grades={Math:75,Reading:75,Science:75,Art:75,'Social Studies':75};
+  showMathGate();
+}
+const ADMIN_CODE='6767676767';
+
+const ALL_ELECTIVES=['Creative Arts','Band','Art I','Band I','Chess','Financial Literacy I','Intro to Speech & Debate','Media Careers','Physical Education','Semester Split','Art II','Concert Band','Band III','Music Ensemble','Band IV','Digital Tools/Career Exploration','Financial Literacy II','High School Credit','Peer Counseling I','Speech I','JROTC'];
+const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
+const LENI_ART=['Starlight Garden','Moonlit Ocean','Rainbow Forest','Crystal Butterflies','Sunset Mountains','Dancing Fireflies','Enchanted Treehouse','Galaxy Flowers','Mermaid Cove','Snowy Owl','Cherry Blossom Rain','Hidden Waterfall','Fairy Mushroom Village','Northern Lights','Underwater Castle','Cloud Kingdom','Dragon Lullaby','Autumn Fox','Hummingbird Dreams','Lavender Fields','Moonflower Meadow','Paper Lantern Night','Secret Garden Gate'];
+const MEMES=['no cap','fr fr','this is giving...','on god','lowkey','its giving slay','67 67 67 67 67','bruh moment','main character energy','ate and left no crumbs','slay bestie','rent free in my head','understood the assignment','delulu is the solulu','periodt','say less','bet','caught in 4k','this goes hard','vibe check'];
+const BRAINROT_REACTS=['💀','😭','🗣️🔥','no cap','frfr','67 67 67 67 67','SLAY','im dead','nahhh','bruh','ate that','on god','periodt'];
+
+function randMeme(){return MEMES[randInt(0,MEMES.length-1)];}
+function randBR(){return BRAINROT_REACTS[randInt(0,BRAINROT_REACTS.length-1)];}
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function goToScene(id){document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('game-container').scrollIntoView({behavior:'smooth',block:'start'});}
+
+// ==================== RULES ====================
+let declineCount=0;
+function acceptRules(){goToScene('scene-signup');}
+function declineRules(){
+  declineCount++;
+  const w=document.getElementById('rules-warning');
+  if(declineCount===1){w.innerHTML='<span style="color:#e65100;">⚠️ WARNING: Accept the rules or you will be BANNED.</span>';}
+  else{document.getElementById('game-container').innerHTML='<div style="text-align:center;padding:60px 20px;"><h1 style="color:#c62828;">🚫 BANNED 🚫</h1><p style="font-size:1.1em;color:#c62828;margin:20px 0;">You were banned for declining the rules.</p><p style="color:#888;">Refresh to try again!</p></div>';}
+}
+
+// ==================== SIMPLE SIGN UP ====================
+document.getElementById('signup-name').addEventListener('input',checkSignup);
+document.getElementById('player-real-age').addEventListener('input',function(){
+  const age=parseInt(this.value);
+  document.getElementById('parent-approve-section').style.display=(age&&age<18)?'block':'none';
+  checkSignup();
+});
+function checkSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const ageOk=parseInt(document.getElementById('player-real-age').value)>=5;
+  document.getElementById('signup-btn').disabled=!(name&&ageOk);
+}
+function completeSignup(){goToScene('scene-welcome');}
+
+// ==================== CHARACTER CREATOR ====================
+const grid=document.getElementById('elective-grid');
+ALL_ELECTIVES.forEach(name=>{const b=document.createElement('button');b.className='elec-btn';b.textContent=name;b.onclick=()=>toggleElective(b,name);grid.appendChild(b);});
+function toggleElective(btn,name){
+  if(btn.classList.contains('selected')){btn.classList.remove('selected');player.electives=player.electives.filter(e=>e!==name);}
+  else{if(player.electives.length>=2)return;btn.classList.add('selected');player.electives.push(name);}
+  document.querySelectorAll('.elec-btn').forEach(b=>{if(!b.classList.contains('selected'))b.classList.toggle('disabled',player.electives.length>=2);});
+  document.getElementById('elec-count').textContent=player.electives.length+' / 2 chosen';checkReady();
+}
+function pick(field,value,btn){player[field]=value;btn.parentElement.querySelectorAll('.pick-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');updateAvatar();checkReady();}
+function pickSkin(el,color){player.skin=color;document.querySelectorAll('#skin-picker .color-dot').forEach(d=>d.classList.remove('selected'));el.classList.add('selected');updateAvatar();checkReady();}
+function pickHair(el){player.hairEmoji=el.textContent;document.querySelectorAll('.hair-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');updateAvatar();checkReady();}
+function updateAvatar(){const p=document.getElementById('avatar-preview');if(player.hairEmoji)p.textContent=player.hairEmoji;if(player.skin)p.style.background=player.skin;p.style.borderColor=player.gender==='girl'?'#f48fb1':player.gender==='boy'?'#64b5f6':'#e1bee7';}
+function checkReady(){const n=document.getElementById('player-name').value.trim();document.getElementById('start-btn').disabled=!(n&&player.gender&&player.age&&player.personality&&player.skin&&player.hairEmoji&&player.electives.length===2);}
+document.getElementById('player-name').addEventListener('input',checkReady);
+
+// ==================== START GAME ====================
+function startGame(){
+  player.name=document.getElementById('player-name').value.trim();friendship=10;level=1;
+  document.getElementById('chat-panel').classList.remove('hidden','minimized');
+  document.getElementById('chat-body').innerHTML=''; // start chat empty
+  showMathGate();
+}
+
+// ==================== MATH GATE ====================
+function showMathGate(){
+  document.getElementById('math-level-num').textContent=level;
+  document.getElementById('math-level-num2').textContent=level;
+  document.getElementById('math-answer').value='';document.getElementById('math-result').textContent='';
+  const mm=['this is giving... mathematician 📐','math is bussin fr fr 🧮','no cap you better get this right 💀','67 67 67 67 67 do the math 🗣️','lowkey this math aint that hard... or is it 😭','brain check! are you smarter than Andre? (low bar) 🤣','Leni could solve this while painting tbh 🎨'];
+  document.getElementById('math-brainrot').textContent=mm[level%mm.length];
+
+  // AGE-BASED + ADAPTIVE DIFFICULTY
+  // Age sets the baseline: younger = easier, older = harder
+  // Then adaptive adjusts up/down based on streak
+  const playerAge=parseInt(document.getElementById('player-real-age').value)||player.age||10;
+  let a,b,op,answer;
+
+  // Age baseline: 5-7=super easy, 8-9=easy, 10-11=medium, 12+=harder
+  // Then level and adaptive shift it further
+  let difficulty;
+  if(level===1){
+    // FIRST QUESTION: purely based on age
+    if(playerAge<=7) difficulty=1;
+    else if(playerAge<=9) difficulty=2;
+    else if(playerAge<=11) difficulty=3;
+    else difficulty=4;
+  } else {
+    // After level 1: age baseline + level progression + adaptive adjustment
+    let base=playerAge<=7?1:playerAge<=9?2:playerAge<=11?3:4;
+    difficulty=base+Math.floor(level/5)+(adaptiveDiff-2);
+    difficulty=Math.max(1,Math.min(difficulty,6));
+  }
+
+  if(difficulty<=1){
+    // SUPER EASY: tiny addition (ages 5-7, level 1)
+    a=randInt(1,5);b=randInt(1,5);op='+';answer=a+b;
+  } else if(difficulty<=2){
+    // EASY: simple addition (ages 8-9)
+    a=randInt(1,10);b=randInt(1,10);op='+';answer=a+b;
+  } else if(difficulty<=3){
+    // MEDIUM: addition/subtraction (ages 10-11)
+    if(Math.random()<.5){a=randInt(5,20);b=randInt(1,a);op='-';answer=a-b;}
+    else{a=randInt(5,25);b=randInt(5,25);op='+';answer=a+b;}
+  } else if(difficulty<=4){
+    // HARDER: multiplication (ages 12+)
+    a=randInt(2,12);b=randInt(2,12);op='x';answer=a*b;
+  } else if(difficulty<=5){
+    // HARD: division
+    answer=randInt(2,12);b=randInt(2,12);a=answer*b;op='÷';
+  } else {
+    // HARDEST: big multiplication or mixed
+    if(Math.random()<.5){a=randInt(10,50);b=randInt(10,50);op='+';answer=a+b;}
+    else{a=randInt(3,15);b=randInt(3,15);op='x';answer=a*b;}
+  }
+
+  document.getElementById('math-question').textContent=`${a} ${op} ${b} = ?`;mathAnswer=answer;
+  goToScene('scene-math');updateLeaderboardMini();
+}
+
+function checkMath(){
+  const val=parseInt(document.getElementById('math-answer').value);const res=document.getElementById('math-result');
+  if(val===mathAnswer){
+    res.textContent='✓ SLAY!! You got it! 💅';res.className='math-result math-correct';
+    // BOOST GRADES on correct answer
+    mathStreak++;mathWrong=0;
+    grades.Math=Math.min(100,grades.Math+randInt(3,8));
+    // Random boost another subject too
+    const otherSubj=SUBJECTS[randInt(1,SUBJECTS.length-1)];
+    grades[otherSubj]=Math.min(100,grades[otherSubj]+randInt(1,4));
+    // Adapt difficulty UP if doing well
+    if(mathStreak>=3&&adaptiveDiff<4)adaptiveDiff++;
+    setTimeout(()=>{goToScene('scene-game');renderLevel();},700);
+  } else {
+    res.textContent='✗ nah thats not it bestie 😭 try again!';res.className='math-result math-wrong';
+    document.getElementById('math-answer').value='';
+    // DROP GRADES on wrong answer
+    mathWrong++;mathStreak=0;
+    grades.Math=Math.max(0,grades.Math-randInt(5,12));
+    // Random drop another subject
+    const otherSubj=SUBJECTS[randInt(1,SUBJECTS.length-1)];
+    grades[otherSubj]=Math.max(0,grades[otherSubj]-randInt(2,6));
+    // Adapt difficulty DOWN if struggling
+    if(mathWrong>=2&&adaptiveDiff>1)adaptiveDiff--;
+    updateReportCard(); // check for all F's
+  }
+}
+
+// ==================== INFINITE LEVEL SYSTEM ====================
+const EVENTS=[
+  {type:'leni-art',gen:()=>{const art=LENI_ART[level%LENI_ART.length];return{story:[{speaker:'Narrator',text:`It's ${getDayName()} at S.A.M. Academy. The Art Board results are in... and ONCE AGAIN it's <b>LENI</b>!! Her piece "<b>${art}</b>" is this week's best. she literally never misses 🐐`},{speaker:'Leni',cls:'leni',text:`<em>*sees her name on the board, turns tomato red*</em> n-not again... everyone's looking at me... <em>*hides behind sketchbook*</em>`},{speaker:'Destiny',cls:'destiny',text:`LENI!! GIRL!! YOU ATE AND LEFT NO CRUMBS!! 67 67 67 67 67!! <em>*shaking her by the shoulders*</em>`},{speaker:'Leni',cls:'leni',text:`Destiny PLEASE stop saying 67!! I HATE that number!! 😣`},{speaker:'Andre',cls:'andre',text:`<em>*walks by, sunglasses on indoors*</em> Nice painting. 67 67 67 67 67. Almost as fire as me. Almost. <em>*winks*</em>`}],artBoard:{text:`This week's winner: LENI -- "${art}" -- she's literally the GOAT of Creative Arts 🐐`},choices:[{text:`Run up and hype Leni: "SLAY QUEEN you understood the assignment!!"`,id:'hype'},{text:`Tell Andre "sir she is 1000x more talented than you are hot" 💀`,id:'roast'},{text:`Give Leni a quiet side-hug -- she looks overwhelmed`,id:'comfort'}]};},respond:(c)=>{const N=player.name;if(c==='hype')return{speaker:'Leni',cls:'leni',text:`<em>*somehow turns even MORE red*</em> ${N} p-please... <em>*but she's smiling so big*</em> ...thank you... you're the reason I even keep posting my art... <em>*quiet happy tears*</em>`,pts:24};if(c==='roast')return{speaker:'Andre',cls:'andre',text:`<em>*jaw drops*</em> I... that... <em>*Destiny is SCREAMING laughing*</em> okay ${N} that was personal 💀<br><br><span class="speaker destiny">Destiny:</span> 67 67 67 67 67!! ${N} ENDED HIM!! <em>*can't breathe*</em><br><br><span class="speaker leni">Leni:</span> ...can we celebrate WITHOUT saying 67?? please?? 😣`,pts:22};return{speaker:'Leni',cls:'leni',text:`<em>*melts into the hug*</em> ...everything is so loud and everyone's looking but... this helps... <em>*whispers*</em> you're the best friend I've ever had, ${N}... at least you don't say 67...`,pts:25};}},
+  {type:'destiny-adhd',gen:()=>{const sc=[`Destiny runs in 5 minutes late, one shoe untied, backpack OPEN, papers flying everywhere. "I'M NOT LATE THE CLOCK IS EARLY!!"`,`Destiny has been talking for 3 minutes straight about a dream she had, forgot where she was going with it, started a NEW story, and just asked "wait what was I saying?"`,`Destiny tried to organize her locker. It's now somehow MORE messy. She found a sandwich from 2 weeks ago. She is not okay.`,`Destiny got distracted by a bird outside the window during a test and wrote "birds are cool" as an answer to question 5.`,`Destiny lost her pencil. It was behind her ear. She found it 20 minutes later when it fell on her desk.`];return{story:[{speaker:'Narrator',text:`It's ${getDayName()} at S.A.M. Academy. no cap Destiny is in her ADHD era rn 💀`},{speaker:'Destiny',cls:'destiny',text:sc[level%sc.length]},{speaker:'Leni',cls:'leni',text:`<em>*quietly slides her an extra pencil*</em> ...here, Destiny...`},{speaker:'Andre',cls:'andre',text:`bruh moment 💀 Destiny you good?? 67 67 67 67 67`}],choices:[{text:`Help Destiny get it together -- "girl breathe!! you got this!" 💪`,id:'help'},{text:`Just laugh because honestly this is peak comedy 😂`,id:'laugh'},{text:`Distract the teacher so nobody notices the chaos`,id:'cover'}]};},respond:(c)=>{const N=player.name;if(c==='help')return{speaker:'Destiny',cls:'destiny',text:`<em>*takes world's deepest breath*</em> okay okay OKAY I'm good. ${N} you're literally my emotional support bestie fr fr. <em>*immediately drops something else*</em> ...I'm MOSTLY good. 67 67 67 67 67!!`,pts:24};if(c==='laugh')return{speaker:'Destiny',cls:'destiny',text:`STOP LAUGHING AT ME!! <em>*also laughing*</em> okay it IS kinda funny 😭 the sandwich was PETRIFIED ${N}!! it was a FOSSIL!!<br><br><span class="speaker leni">Leni:</span> <em>*trying so hard not to laugh*</em> ...it was pretty bad...`,pts:20};return{speaker:'Destiny',cls:'destiny',text:`${N} out here being my SECRET AGENT!! <em>*salutes*</em> you distracted Mrs. Torres like a PRO. we move in silence like the "g" in lasagna 🤫<br><br><span class="speaker andre">Andre:</span> that was lowkey smooth ${N}. 67 67 67 67 67. respect.`,pts:22};}},
+  {type:'andre-trouble',gen:()=>{const pr=[`Andre replaced all the whiteboard markers with crayons. The teacher's face is PRICELESS. 💀`,`Andre wore sunglasses to class and told the teacher he has "a medical condition called being too cool." He got a warning. He does not care.`,`Andre started a slow clap in the middle of a test. NOBODY joined. He kept going. For 30 seconds.`,`Andre put a "KICK ME" sign on James's back. James, who is 15 and in 10th grade. Andre chose violence today.`,`Andre tried to convince the teacher that "67 67 67 67 67" was the answer to every math problem.`,`Andre asked if he could present his homework "via interpretive dance." The teacher said no. He did it anyway.`];return{story:[{speaker:'Narrator',text:`It's ${getDayName()}. Andre is in his troublemaker era AGAIN 💀`},{speaker:'Narrator',text:pr[level%pr.length]},{speaker:'Andre',cls:'andre',text:`<em>*leaning back in chair*</em> What? somebody had to keep it interesting. 67 67 67 67 67 😎`},{speaker:'Destiny',cls:'destiny',text:`ANDRE!! you're gonna get EXPELLED and then who am I gonna roast?! 67 67 67 67 67!!`},{speaker:'Leni',cls:'leni',text:`...why does everyone keep saying 67... I literally hate that number so much... 😣`}],choices:[{text:`Try not to laugh (you fail BADLY) 😂`,id:'laugh'},{text:`"Andre... my brother in christ... WHY" but you're smiling`,id:'why'},{text:`Give him a 💀 look and say "caught in 4k"`,id:'4k'}]};},respond:(c)=>{if(c==='laugh')return{speaker:'Andre',cls:'andre',text:`SEE?! ${player.name} gets it! I'm not a troublemaker, I'm an ENTERTAINER. 67 67 67 67 67!! <em>*teacher clears throat*</em><br><br><span class="speaker leni">Leni:</span> ...stop... saying... 67... 😣`,pts:18};if(c==='why')return{speaker:'Andre',cls:'andre',text:`BECAUSE ${player.name}!! the vibes were LOW!! <em>*dramatic pose*</em><br><br><span class="speaker leni">Leni:</span> <em>*quietly*</em> ...the vibes were fine before you set the marker on fire, Andre...`,pts:20};return{speaker:'Destiny',cls:'destiny',text:`CAUGHT IN 4K!! ${player.name} said 📸📸📸!! <em>*dying*</em> 67 67 67 67 67!!<br><br><span class="speaker leni">Leni:</span> Destiny I swear if you say 67 ONE more time... 😣<br><br><span class="speaker andre">Andre:</span> 67. <br><span class="speaker leni">Leni:</span> 😡`,pts:20};}},
+  {type:'james-annoying',gen:()=>{const an=[`James walks through the 5th grade hallway and yells "DESTINY STILL WATCHES COCOMELON!!" He's lying but the DAMAGE is done. 💀`,`James showed up at lunch and stole 3 chicken nuggets. He said "big brother tax." Destiny is about to throw hands.`,`James told Destiny's entire friend group that she cried watching a commercial last week. It was about puppies. She's not denying it.`,`James dabbed at Destiny from across the cafeteria. In front of EVERYONE. In 2026. Dabbing. he needs to be stopped.`,`James called Destiny "Lil D" in front of the whole school and she has never wanted to change her name more.`];return{story:[{speaker:'Narrator',text:`It's ${getDayName()}. James just showed up to be annoying. he never misses his shift 💀`},{speaker:'James',cls:'james',text:an[level%an.length]},{speaker:'Destiny',cls:'destiny',text:`JAMES I AM GOING TO -- <em>*takes a breath*</em> -- DESTROY YOUR MINECRAFT WORLD!! 67 67 67 67 67!!`},{speaker:'Leni',cls:'leni',text:`<em>*hiding*</em> ...why is he so TALL and so LOUD... also Destiny said 67 again 😣`}],choices:[{text:`Stand up and say "James you're a 10th grader bullying 5th graders. that's NOT it chief 💀"`,id:'confront'},{text:`Make Destiny laugh -- "girl he's literally dabbing in 2026"`,id:'deflect'},{text:`Start a "JAMES IS CRINGE" chant`,id:'chant'}]};},respond:(c)=>{const N=player.name;if(c==='confront')return{speaker:'James',cls:'james',text:`<em>*actually stops*</em> ...okay dang. Little ${player.gender==='girl'?'sis':'bro'} got BARS. <em>*puts hands up*</em> aight aight I'm out. 67 67 67 67 67 tho. <em>*leaves*</em><br><br><span class="speaker destiny">Destiny:</span> ${N}!! YOU ENDED MY BROTHER!! <em>*tackle hug*</em>`,pts:25};if(c==='deflect')return{speaker:'Destiny',cls:'destiny',text:`<em>*snort laughs*</em> he IS!! he's dabbing!! in TWO THOUSAND TWENTY SIX!! <em>*crying laughing*</em> OH MY GOD he's a FOSSIL!!<br><br><span class="speaker leni">Leni:</span> <em>*giggling behind her hand*</em> ...that was really funny ${N}...`,pts:22};return{speaker:'Narrator',text:`The table starts chanting "JAMES IS CRINGE!" James turns RED and speed-walks away.<br><br><span class="speaker destiny">Destiny:</span> GREATEST DAY OF MY LIFE!! 67 67 67 67 67!! <em>*dancing*</em><br><br><span class="speaker leni">Leni:</span> that WAS funny but STOP SAYING 67!! 😣`,pts:24};}},
+  {type:'friendship',gen:()=>{const mo=[{nar:`It's ${getDayName()} during free period. Leni pulls out her sketchbook and draws the three of you 🥹`,leni:`I wanted to draw us... <em>*shows a BEAUTIFUL sketch*</em> ...is that cringe?`,destiny:`CRINGE?! GIRL!! MASTERPIECE!! MUSEUM!! 67 67 67 67 67!!`,leniReact:`...can you compliment me without saying 67...? 😣`},{nar:`It's ${getDayName()} and raining so lunch is inside. Destiny wants to make friendship bracelets 💅`,leni:`<em>*already making the prettiest one*</em> ...I put a star bead on yours...`,destiny:`Mine is gonna say "67" in letter beads. don't judge me.`,leniReact:`...mine says "NO 67" and I mean it. 😤`},{nar:`It's ${getDayName()} and the school photographer is doing friend group photos 📸`,leni:`<em>*terrified*</em> do I have to... smile? I forgot how to smile??`,destiny:`LENI THINK ABOUT KITTENS!! <em>*poses*</em> 67 67 67 67 67 SAY CHEESE!!`,leniReact:`I'm not saying 67 as cheese. ever.`},{nar:`It's ${getDayName()}. Someone left a mean note on Leni's Art Board piece 😤`,leni:`<em>*eyes watery*</em> ...it says my art is "weird"...`,destiny:`WHO. WROTE. THIS. I need NAMES. 67 67 67 67 67 we ride at DAWN!!`,leniReact:`...at least the note didn't say 67... small blessings...`}];const m=mo[level%mo.length];return{story:[{speaker:'Narrator',text:m.nar},{speaker:'Leni',cls:'leni',text:m.leni},{speaker:'Destiny',cls:'destiny',text:m.destiny},{speaker:'Leni',cls:'leni',text:m.leniReact}],choices:[{text:`"I love you guys sm this is the best friend group fr fr" 🥹`,id:'love'},{text:`Group hug IMMEDIATELY 🫂`,id:'hug'},{text:`"we are literally the main characters of this school PERIODT" 💅`,id:'main'}]};},respond:(c)=>{if(c==='love')return{speaker:'Leni',cls:'leni',text:`<em>*actually crying*</em> I never had friends before you guys... <em>*Destiny is ALSO crying*</em><br><br><span class="speaker destiny">Destiny:</span> YES WE ARE CRYING AND IT'S BEAUTIFUL!! 67 67 67-- <br><span class="speaker leni">Leni:</span> DESTINY!! 😣<br><span class="speaker destiny">Destiny:</span> sorry sorry LOVE YOU!! 😭💕`,pts:25};if(c==='hug')return{speaker:'Destiny',cls:'destiny',text:`GROUP HUUUUG!! <em>*SQUEEZES*</em> nobody let go!! 67 67--<br><span class="speaker leni">Leni:</span> if you say 67 during our hug I'm LEAVING<br><span class="speaker destiny">Destiny:</span> ...okay fine. LOVE HUG!! <br><span class="speaker andre">Andre:</span> <em>*walking over*</em> room for--<br><span class="speaker destiny">Destiny:</span> NO!!<br><span class="speaker leni">Leni:</span> <em>*giggling*</em> ...maybe just this once...`,pts:25};return{speaker:'Destiny',cls:'destiny',text:`PERIODT!! WE ATE!! 67 67 67 67 67!! <em>*poses*</em><br><br><span class="speaker leni">Leni:</span> <em>*posing too but covering her ears*</em> I love you guys but I HATE that number!! <em>*cutest pose ever*</em><br><br><span class="speaker andre">Andre:</span> <em>*photobombs*</em> 67!! 😎`,pts:22};}},
+  {type:'elective',gen:()=>{const e1=player.electives[0];const inCA=player.electives.includes('Creative Arts');return{story:[{speaker:'Narrator',text:`It's ${getDayName()} -- elective time! You head to <b>${e1}</b>. ${inCA?`You're in Creative Arts with LENI! she's painting something INCREDIBLE 🎨`:`Leni is in Creative Arts absolutely DESTROYING as usual 🐐`}`},{speaker:'Destiny',cls:'destiny',text:`Tell me everything about ${e1} later!! 67 67 67 67 67!! <em>*runs to her class*</em> wait which room?? <em>*runs other way*</em>`},{speaker:'Andre',cls:'andre',text:`I did NOT do the homework for ${['any class','my elective','literally anything'][randInt(0,2)]}. 67 67 67 67 67 💀`}],choices:[{text:`Lock in and work hard -- grindset mode 💪`,id:'grind'},{text:`Doodle Leni-style art in your notebook 🎨`,id:'art'},{text:`Count down until you can hang with the squad again`,id:'miss'}]};},respond:(c)=>{const N=player.name;if(c==='grind')return{speaker:'Narrator',text:`You absolutely ATE in class! Teacher gave you a shout-out! Destiny started a standing ovation at lunch. Leni drew you a tiny trophy 🏆`,pts:22};if(c==='art')return{speaker:'Leni',cls:'leni',text:`<em>*sees your doodles*</em> ${N}!! you drew something!! <em>*eyes SPARKLING*</em> can I keep this?? this is going on MY wall!! ...no 67s on it either, perfect 💕`,pts:25};return{speaker:'Destiny',cls:'destiny',text:`LITERALLY SAME!! <em>*pulls out list of 47 ideas*</em> option 1: get food. option 2: MORE food. option 67: -- wait I mean option 3. <br><br><span class="speaker leni">Leni:</span> you almost said it. I heard you. 😣`,pts:20};}},
+  {type:'andre-flirt',gen:()=>{const li=[`Are you a parking ticket? Cause you got FINE written all over-- <em>*Destiny throws a pencil at him*</em>`,`Did it hurt when you fell from the vending machine? Cause you're a snack. <em>*finger guns*</em>`,`Is your name Google? Cause you got everything I've been searching for. <em>*winks*</em>`,`Are you a campfire? Cause you're hot and I want s'more. <em>*gets hit with a textbook*</em>`,`Do you have a map? Cause I just got lost in your-- <em>*Destiny: "FINISH THAT SENTENCE I DARE YOU"*</em>`];return{story:[{speaker:'Narrator',text:`It's ${getDayName()}. Andre is in his flirt era. somebody stop him. 💀`},{speaker:'Andre',cls:'andre',text:li[level%li.length]},{speaker:'Destiny',cls:'destiny',text:`ANDRE!! WORST PICKUP LINE EVER!! 67 67 67 67 67!! <em>*wheezing*</em>`},{speaker:'Leni',cls:'leni',text:`<em>*genuinely confused*</em> ...what's a pickup line...? also why did Destiny say 67 AGAIN 😣`}],choices:[{text:`Hit him with "67 67 67 67 67 that was CRINGE bro" 💀`,id:'cringe'},{text:`Fire back with an EVEN WORSE pickup line`,id:'battle'},{text:`Just stare at him in silence until he gets uncomfortable`,id:'stare'}]};},respond:(c)=>{if(c==='cringe')return{speaker:'Andre',cls:'andre',text:`<em>*clutches heart*</em> 67 67 67 67 67 right back at you!! that HURT!!<br><br><span class="speaker destiny">Destiny:</span> your SOUL needs THERAPY 💀<br><br><span class="speaker leni">Leni:</span> EVERYONE is saying 67 now?! I'm going to my art room. GOODBYE. 😣`,pts:20};if(c==='battle')return{speaker:'Destiny',cls:'destiny',text:`PICKUP LINE BATTLE!! 67 67 67 67 67!! <em>*grabs imaginary popcorn*</em><br><br><span class="speaker andre">Andre:</span> <em>*actually blushing*</em> okay that was good. I'm shook. ${player.name} really said "hold my juice box" 💀<br><br><span class="speaker leni">Leni:</span> ...I don't understand any of this but at least nobody's talking about 67-- <br><span class="speaker destiny">Destiny:</span> 67!!<br><span class="speaker leni">Leni:</span> 😡`,pts:22};return{speaker:'Andre',cls:'andre',text:`<em>*sweating*</em> ...why are you just LOOKING at me... <em>*runs away*</em><br><br><span class="speaker destiny">Destiny:</span> ${player.name} DESTROYED Andre with SILENCE!! 67 67 67 67 67!! 😭<br><br><span class="speaker leni">Leni:</span> that was iconic but PLEASE stop saying 67 Destiny 😣`,pts:22};}},
+  {type:'meme-day',gen:()=>({story:[{speaker:'Narrator',text:`It's ${getDayName()} and someone started a meme war in the group chat. peak brainrot hours 🧠💀`},{speaker:'Destiny',cls:'destiny',text:`I sent "67 67 67 67 67" in the group chat 47 times and got MUTED!! CENSORSHIP!! 😤`},{speaker:'Andre',cls:'andre',text:`I posted a picture of the math teacher as a meme. worth it. 67 67 67 67 67. no cap. 😎`},{speaker:'Leni',cls:'leni',text:`<em>*sent one (1) meme -- a cat in a tiny hat -- it was the funniest one*</em> also can EVERYONE stop saying 67?? I HATE IT!! you're all the WORST!! 😣😣😣`}],choices:[{text:`Send "67 67 67 67 67" 100 more times with Destiny`,id:'spam'},{text:`Tell Leni her meme was the best one 👑`,id:'leni'},{text:`Start a petition to unmute Destiny`,id:'petition'}]}),respond:(c)=>{if(c==='spam')return{speaker:'Destiny',cls:'destiny',text:`${player.name} IS A REAL ONE!! 67 67 67 67 67 FOREVER!! <em>*you both get muted*</em> worth it 🤝<br><br><span class="speaker leni">Leni:</span> <em>*puts phone down*</em> I'm LEAVING this group chat. I HATE 67. you guys are the WORST. <em>*doesn't actually leave*</em> ...but I'm mad about it.`,pts:22};if(c==='leni')return{speaker:'Leni',cls:'leni',text:`<em>*blushing HARD*</em> r-really?? it was just a cat in a hat...<br><br><span class="speaker destiny">Destiny:</span> LENI!! MEME LORD!! 67 67 67--<br><span class="speaker leni">Leni:</span> I WILL BLOCK YOU DESTINY!! 😣`,pts:24};return{speaker:'Destiny',cls:'destiny',text:`A PETITION!! ${player.name} understood the ASSIGNMENT!!<br><br><span class="speaker andre">Andre:</span> free Destiny. 67 67 67 67 67. she did nothing wrong 😎<br><br><span class="speaker leni">Leni:</span> <em>*signs it*</em> ...I believe in free speech... but NOT in the number 67. I hate it. so much. 😣`,pts:20};}}
+];
+
+function getDayName(){return DAYS[level%DAYS.length];}
+function renderLevel(){
+  document.getElementById('level-badge').textContent='Level '+level;
+  document.getElementById('day-label').textContent=getDayName()+' -- Week '+Math.ceil(level/5);
+  document.getElementById('game-player-card').innerHTML=`<b>${player.name}</b> | ${player.gender} | Age ${player.age} | ${player.personality} | Level ${level} | Electives: <b>${player.electives[0]}</b> & <b>${player.electives[1]}</b>`;
+  const evt=EVENTS[level%EVENTS.length];const data=evt.gen();window._evt=evt;window._data=data;
+  let html='';data.story.forEach(s=>{html+=`<div class="story-box"><span class="speaker ${s.cls||''}">${s.speaker}:</span> ${s.text}</div>`;});
+  if(data.artBoard)html+=`<div class="art-board"><div class="art-board-title">S.A.M. Academy Art Board -- Best Piece of the Week 🎨</div><p>${data.artBoard.text}</p></div>`;
+  document.getElementById('game-story').innerHTML=html;
+  const ch=document.getElementById('game-choices');ch.innerHTML='';
+  data.choices.forEach(c=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=c.text;b.onclick=()=>makeChoice(c.id);ch.appendChild(b);});
+  updateGameMeter();
+  updateReportCard();
+}
+function makeChoice(id){
+  const resp=window._evt.respond(id);friendship+=resp.pts||20;if(friendship>100)friendship=100;updateGameMeter();
+
+  // Story choices boost grades in different subjects
+  const evtType=window._evt.type;
+  if(evtType==='leni-art'||evtType==='elective')grades.Art=Math.min(100,grades.Art+randInt(2,6));
+  if(evtType==='friendship')grades['Social Studies']=Math.min(100,grades['Social Studies']+randInt(2,6));
+  if(evtType==='destiny-adhd')grades.Reading=Math.min(100,grades.Reading+randInt(1,4));
+  if(evtType==='meme-day')grades.Science=Math.min(100,grades.Science+randInt(1,3));
+  // All choices give a tiny random boost
+  const rSubj=SUBJECTS[randInt(0,SUBJECTS.length-1)];
+  grades[rSubj]=Math.min(100,grades[rSubj]+randInt(1,3));
+
+  document.getElementById('game-story').innerHTML+=`<div class="story-box"><span class="speaker ${resp.cls||''}">${resp.speaker}:</span> ${resp.text}</div>`;
+  document.getElementById('game-choices').innerHTML=`<div style="text-align:center"><button class="btn" onclick="nextLevel()">Next Level →</button></div>`;
+  updateReportCard();
+
+  const r=[
+    {from:'Destiny',text:['YESSS!! 💅','67 67 67 67 67','im DEAD 💀','SLAY','no cap FIRE 🔥','I CANT 😭','periodt.','67 67 67!!'][randInt(0,7)],cls:'destiny'},
+    {from:'Leni',text:['...that was nice... 🌸','...hehe...','...I liked that...','...thank you...','🎨','...stop saying 67 😣','...why does everyone love 67... I hate it...','...can we talk about art...'][randInt(0,7)],cls:'leni'},
+    {from:'Andre',text:['respect 😎','bet','smooth 67 67 67','not bad','67 67 67 67 67!! 🔥'][randInt(0,4)],cls:'andre'}
+  ];
+  setTimeout(()=>addChatMsg(r[0].from,r[0].text,r[0].cls),500);
+  setTimeout(()=>addChatMsg(r[1].from,r[1].text,r[1].cls),1400);
+  if(Math.random()>.3)setTimeout(()=>addChatMsg(r[2].from,r[2].text,r[2].cls),2200);
+  saveToLeaderboard();
+}
+function nextLevel(){level++;showMathGate();}
+function updateGameMeter(){const f=Math.min(friendship,100);const fill=document.getElementById('meter-game');if(fill)fill.style.width=f+'%';const h=document.getElementById('hearts-game');if(h){const full=Math.floor(f/20);h.textContent='\u2764\uFE0F'.repeat(full)+'\uD83E\uDD0D'.repeat(5-full);}}
+
+// ==================== CHAT ====================
+function toggleChat(){const p=document.getElementById('chat-panel');p.classList.toggle('minimized');document.getElementById('chat-toggle-icon').textContent=p.classList.contains('minimized')?'\u25B2':'\u25BC';}
+function addChatMsg(from,text,cls){const body=document.getElementById('chat-body');const d=document.createElement('div');d.className='chat-msg them';d.innerHTML=`<div class="chat-name" style="color:${cls==='leni'?'#7b1fa2':cls==='destiny'?'#e65100':cls==='andre'?'#1565c0':cls==='james'?'#2e7d32':'#ad1457'}">${from}</div>${text}`;body.appendChild(d);body.scrollTop=body.scrollHeight;}
+function sendChat(){
+  const inp=document.getElementById('chat-input');const text=inp.value.trim();if(!text)return;inp.value='';
+  const body=document.getElementById('chat-body');const d=document.createElement('div');
+  d.className='chat-msg you';d.innerHTML=`<div class="chat-name">${player.name||'You'}</div>${text}`;body.appendChild(d);body.scrollTop=body.scrollHeight;
+  // Check if user said 67
+  const said67=text.includes('67');
+  setTimeout(()=>{
+    if(said67){
+      addChatMsg('Destiny','YESSS 67 67 67 67 67!! 🗣️🔥','destiny');
+      setTimeout(()=>addChatMsg('Leni','...I hate all of you. 😣','leni'),600);
+      setTimeout(()=>addChatMsg('Andre','67 67 67 67 67!! 😎','andre'),1000);
+    } else {
+      const replies=[
+        {from:'Destiny',text:['YESSS!!','lol WHAT','OMG','no way!! 💀','67 67 67 67 67','wait what 😭','say less','bet','frfr'][randInt(0,8)],cls:'destiny'},
+        {from:'Leni',text:['...oh...','...hehe...','...thats nice 🌸','...really?','...wow...','...finally someone NOT saying 67... thank you...'][randInt(0,5)],cls:'leni'},
+        {from:'Andre',text:['cool cool 😎','bet','67 67 67 67 67','nice','oh word?','smooth'][randInt(0,5)],cls:'andre'}
+      ];
+      const r=replies[randInt(0,2)];addChatMsg(r.from,r.text,r.cls);
+    }
+  },600+Math.random()*1200);
+}
+
+// ==================== ADMIN ====================
+function showAdminGate(){document.getElementById('admin-code-input').value='';document.getElementById('admin-code-result').textContent='';goToScene('scene-admin-gate');}
+function checkAdminCode(){
+  const code=document.getElementById('admin-code-input').value.replace(/\s/g,'');
+  if(code===ADMIN_CODE){showAdmin();}else{document.getElementById('admin-code-result').textContent='Wrong code! hint: 67 67 67 67 67 💀';}
+}
+function showAdmin(){
+  document.getElementById('admin-profile').innerHTML=`<div class="admin-row">👤 <b>Name:</b> ${player.name}</div><div class="admin-row">⚧ <b>Gender:</b> ${player.gender}</div><div class="admin-row">🎂 <b>Age:</b> ${player.age}</div><div class="admin-row">💭 <b>Personality:</b> ${player.personality}</div><div class="admin-row">📚 <b>Electives:</b> ${player.electives.join(', ')}</div>`;
+  document.getElementById('admin-stats').innerHTML=`<div class="admin-row">🏆 <b>Level:</b> ${level}</div><div class="admin-row">💕 <b>Friendship:</b> ${Math.min(friendship,100)}%</div><div class="admin-row">🧮 <b>Math Answered:</b> ${level-1}</div><div class="admin-row">📅 <b>Week:</b> ${Math.ceil(level/5)}</div><div class="admin-row">🏫 <b>School:</b> S.A.M. Academy</div>`;
+  const lb=getLeaderboard();
+  if(lb.length===0){document.getElementById('admin-players').innerHTML='<div class="admin-row">No players yet!</div>';}
+  else{let ph='';lb.forEach(p=>{ph+=`<div class="admin-row">👤 <b>${p.name}</b> -- Level ${p.level} -- Friendship ${p.friendship}%</div>`;});document.getElementById('admin-players').innerHTML=ph;}
+  goToScene('scene-admin');
+}
+function resetGame(){if(confirm('Reset ALL progress? fr fr?')){localStorage.removeItem('sam_leaderboard');location.reload();}}
+
+// ==================== LEADERBOARD ====================
+function saveToLeaderboard(){
+  let lb=JSON.parse(localStorage.getItem('sam_leaderboard')||'[]');
+  const ex=lb.find(e=>e.name===player.name);
+  if(ex){ex.level=Math.max(ex.level,level);ex.friendship=Math.min(friendship,100);}
+  else lb.push({name:player.name,level,friendship:Math.min(friendship,100)});
+  lb.sort((a,b)=>b.level-a.level);localStorage.setItem('sam_leaderboard',JSON.stringify(lb));
+}
+function getLeaderboard(){return JSON.parse(localStorage.getItem('sam_leaderboard')||'[]').sort((a,b)=>b.level-a.level);}
+function renderLB(tableId,showF){
+  const lb=getLeaderboard();const tbody=document.querySelector('#'+tableId+' tbody');tbody.innerHTML='';
+  if(lb.length===0){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td colspan="${showF?4:3}" style="color:#888;padding:20px;font-style:italic;">No players yet -- be the first!</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+  lb.slice(0,15).forEach((e,i)=>{const isYou=e.name===player.name;const tr=document.createElement('tr');if(isYou)tr.className='you';let c=`<td style="font-weight:700;color:#e65100">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td><td>${e.name}${isYou?' (YOU)':''}</td><td>Level ${e.level}</td>`;if(showF)c+=`<td>${e.friendship}%</td>`;tr.innerHTML=c;tbody.appendChild(tr);});
+}
+function updatePlayerCount(){
+  const lb=getLeaderboard();
+  const count=lb.length;
+  const el=document.getElementById('player-count');
+  if(!el)return;
+  const goal=Math.max(25,Math.ceil(count/25)*25);
+  el.textContent=count+' / '+goal+' players';
+}
+// Clear old fake data on load
+(function(){const lb=JSON.parse(localStorage.getItem('sam_leaderboard')||'[]');const clean=lb.filter(e=>!['Leni','Destiny','Andre','CoolKid2011','ArtGurl','MathWiz67','67squad'].includes(e.name));localStorage.setItem('sam_leaderboard',JSON.stringify(clean));})();
+function updateLeaderboardMini(){saveToLeaderboard();renderLB('lb-table-mini',false);updatePlayerCount();}
+function showLeaderboard(){saveToLeaderboard();renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');}
+
+// Update count on page load
+updatePlayerCount();
+</script>
+</body>
+</html>
