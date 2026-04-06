@@ -123,7 +123,7 @@
 <!-- PLAYER COUNT BAR -->
 <div id="player-count-bar" style="background:linear-gradient(135deg,#ec407a,#ab47bc);color:white;padding:8px 16px;border-radius:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:.85em;font-weight:600;">
   <span>S.A.M. Academy</span>
-  <span id="player-count">0 / 25 players</span>
+  <span><span id="player-count">0 / 25 players</span> <button onclick="shareGame()" style="background:white;color:#ab47bc;border:none;border-radius:8px;padding:4px 10px;font-family:inherit;font-weight:700;font-size:.85em;cursor:pointer;margin-left:8px;">Share 🔗</button></span>
 </div>
 
 <!-- ==================== RULES ==================== -->
@@ -786,6 +786,21 @@ function showLeaderboard(){saveToLeaderboard();renderLB('lb-table-full',true);up
 
 // Update count on page load
 updatePlayerCount();
+
+// ==================== SHARE ====================
+function shareGame(){
+  const url='https://sam-academy.onrender.com';
+  const text='Play S.A.M. Academy! A fun school friendship game 🎮';
+  if(navigator.share){
+    navigator.share({title:'S.A.M. Academy',text:text,url:url});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>{
+      alert('Link copied! Share it with your friends!\n\n'+url);
+    }).catch(()=>{
+      prompt('Copy this link and share it with your friends:',url);
+    });
+  }
+}
 
 // AUTO-LOAD SAVED GAME (runs last after everything is defined)
 if(loadProgress()){
