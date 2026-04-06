@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- SECURITY -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta name="referrer" content="no-referrer">
 <title>S.A.M. Academy - Best Friends Forever</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
@@ -495,6 +500,7 @@ function checkSignup(){
   const ageOk=parseInt(document.getElementById('player-real-age').value)>=5;
   document.getElementById('signup-btn').disabled=!(name&&ageOk);
 }
+function sanitize(str){return str.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/[^\w\s\-!?.,']/g,'').trim();}
 function completeSignup(){goToScene('scene-welcome');}
 
 // ==================== CHARACTER CREATOR ====================
@@ -515,7 +521,7 @@ document.getElementById('player-name').addEventListener('input',checkReady);
 
 // ==================== START GAME ====================
 function startGame(){
-  player.name=document.getElementById('player-name').value.trim();friendship=10;level=1;
+  player.name=sanitize(document.getElementById('player-name').value.trim());friendship=10;level=1;
   document.getElementById('chat-panel').classList.remove('hidden','minimized');
   document.getElementById('chat-body').innerHTML=''; // start chat empty
   showMathGate();
@@ -665,7 +671,13 @@ function updateGameMeter(){const f=Math.min(friendship,100);const fill=document.
 function toggleChat(){const p=document.getElementById('chat-panel');p.classList.toggle('minimized');document.getElementById('chat-toggle-icon').textContent=p.classList.contains('minimized')?'\u25B2':'\u25BC';}
 function addChatMsg(from,text,cls){const body=document.getElementById('chat-body');const d=document.createElement('div');d.className='chat-msg them';d.innerHTML=`<div class="chat-name" style="color:${cls==='leni'?'#7b1fa2':cls==='destiny'?'#e65100':cls==='andre'?'#1565c0':cls==='james'?'#2e7d32':'#ad1457'}">${from}</div>${text}`;body.appendChild(d);body.scrollTop=body.scrollHeight;}
 function sendChat(){
-  const inp=document.getElementById('chat-input');const text=inp.value.trim();if(!text)return;inp.value='';
+  const inp=document.getElementById('chat-input');let text=inp.value.trim();if(!text)return;inp.value='';
+  // SECURITY: sanitize input -- no HTML/scripts allowed
+  text=text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  if(text.length>200)text=text.slice(0,200); // max 200 chars
+  // SAFETY: block personal info patterns
+  const blocked=/\d{3}[-.]?\d{3}[-.]?\d{4}|\d{5,}|@.*\.\w{2,}/; // phone numbers, zip codes, emails
+  if(blocked.test(text)){addChatMsg('System','⚠️ Don\'t share personal info like phone numbers or emails! Stay safe!','');return;}
   const body=document.getElementById('chat-body');const d=document.createElement('div');
   d.className='chat-msg you';d.innerHTML=`<div class="chat-name">${player.name||'You'}</div>${text}`;body.appendChild(d);body.scrollTop=body.scrollHeight;
   // Check if user said 67
