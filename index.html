@@ -462,6 +462,7 @@ function updateReportCard(){
 function restartAfterGameOver(){
   level=1;friendship=10;mathStreak=0;mathWrong=0;adaptiveDiff=1;
   grades={Math:75,Reading:75,Science:75,Art:75,'Social Studies':75};
+  saveProgress();
   showMathGate();
 }
 const ADMIN_CODE='6767676767';
@@ -518,11 +519,44 @@ function updateAvatar(){const p=document.getElementById('avatar-preview');if(pla
 function checkReady(){const n=document.getElementById('player-name').value.trim();document.getElementById('start-btn').disabled=!(n&&player.gender&&player.age&&player.personality&&player.skin&&player.hairEmoji&&player.electives.length===2);}
 document.getElementById('player-name').addEventListener('input',checkReady);
 
+// ==================== SAVE & LOAD ====================
+function saveProgress(){
+  const save={
+    player:{name:player.name,gender:player.gender,age:player.age,personality:player.personality,skin:player.skin,hairEmoji:player.hairEmoji,electives:player.electives},
+    level,friendship,grades,adaptiveDiff,mathStreak,mathWrong
+  };
+  localStorage.setItem('sam_save',JSON.stringify(save));
+}
+
+function loadProgress(){
+  const save=JSON.parse(localStorage.getItem('sam_save')||'null');
+  if(!save||!save.player||!save.player.name)return false;
+  player.name=save.player.name;player.gender=save.player.gender;player.age=save.player.age;
+  player.personality=save.player.personality;player.skin=save.player.skin;
+  player.hairEmoji=save.player.hairEmoji;player.electives=save.player.electives;
+  level=save.level||1;friendship=save.friendship||10;
+  grades=save.grades||{Math:75,Reading:75,Science:75,Art:75,'Social Studies':75};
+  adaptiveDiff=save.adaptiveDiff||1;mathStreak=save.mathStreak||0;mathWrong=save.mathWrong||0;
+  return true;
+}
+
+// Auto-load saved game on page load
+(function(){
+  if(loadProgress()){
+    document.getElementById('chat-panel').classList.remove('hidden','minimized');
+    document.getElementById('chat-body').innerHTML='';
+    showMathGate();
+  }
+})();
+
 // ==================== START GAME ====================
 function startGame(){
   player.name=sanitize(document.getElementById('player-name').value.trim());friendship=10;level=1;
+  grades={Math:75,Reading:75,Science:75,Art:75,'Social Studies':75};
+  adaptiveDiff=1;mathStreak=0;mathWrong=0;
   document.getElementById('chat-panel').classList.remove('hidden','minimized');
-  document.getElementById('chat-body').innerHTML=''; // start chat empty
+  document.getElementById('chat-body').innerHTML='';
+  saveProgress();
   showMathGate();
 }
 
@@ -594,6 +628,7 @@ function checkMath(){
     grades[otherSubj]=Math.min(100,grades[otherSubj]+randInt(1,4));
     // Adapt difficulty UP if doing well
     if(mathStreak>=3&&adaptiveDiff<4)adaptiveDiff++;
+    saveProgress();
     setTimeout(()=>{goToScene('scene-game');renderLevel();},700);
   } else {
     res.textContent='✗ nah thats not it bestie 😭 try again!';res.className='math-result math-wrong';
@@ -674,7 +709,7 @@ function makeChoice(id){
   if(Math.random()>.3)setTimeout(()=>addChatMsg(r[2].from,r[2].text,r[2].cls),2200);
   saveToLeaderboard();
 }
-function nextLevel(){level++;showMathGate();}
+function nextLevel(){level++;saveProgress();showMathGate();}
 function updateGameMeter(){const f=Math.min(friendship,100);const fill=document.getElementById('meter-game');if(fill)fill.style.width=f+'%';const h=document.getElementById('hearts-game');if(h){const full=Math.floor(f/20);h.textContent='\u2764\uFE0F'.repeat(full)+'\uD83E\uDD0D'.repeat(5-full);}}
 
 // ==================== CHAT ====================
