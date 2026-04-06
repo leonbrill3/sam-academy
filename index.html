@@ -789,8 +789,12 @@ updatePlayerCount();
 
 // AUTO-LOAD SAVED GAME (runs last after everything is defined)
 if(loadProgress()){
+  // Remove the rules screen that shows by default
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
   document.getElementById('chat-panel').classList.remove('hidden','minimized');
   document.getElementById('chat-body').innerHTML='';
+  // Go straight to the game
+  goToScene('scene-math');
   showMathGate();
 }
 </script>
