@@ -157,14 +157,10 @@
     </ul>
   </div>
 
-  <div class="checkbox-row">
-    <input type="checkbox" id="rules-check" onchange="document.getElementById('rules-btn').disabled=!this.checked" style="width:24px;height:24px;accent-color:#ab47bc;">
-    <label for="rules-check" style="margin:0;cursor:pointer;font-size:1em;">I have read and accept the rules</label>
-  </div>
-
-  <div style="text-align:center">
-    <button class="btn" id="rules-btn" onclick="acceptRules()" disabled>I Accept -- Let's Go!</button>
-    <button class="btn btn-danger btn-small" id="decline-btn" onclick="declineRules()" style="margin-left:10px;">I Decline</button>
+  <div style="text-align:center;margin-top:14px;">
+    <button class="btn" onclick="acceptRules()">I Accept the Rules -- Let's Go!</button>
+    <br>
+    <button class="btn btn-danger btn-small" onclick="declineRules()" style="margin-top:8px;">I Decline</button>
     <div id="rules-warning" style="margin-top:10px;font-weight:600;min-height:20px;"></div>
   </div>
 </div>
