@@ -427,6 +427,22 @@ const db=firebase.firestore();
   </div>
 </div>
 
+<!-- ELA AI BOT -->
+<div id="ela-panel" style="position:fixed;bottom:0;left:20px;width:320px;max-width:90vw;background:white;border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.15);z-index:1000;display:flex;flex-direction:column;transition:transform .3s;transform:translateY(calc(100% - 44px));">
+  <div onclick="toggleEla()" style="background:linear-gradient(135deg,#43a047,#2e7d32);color:white;padding:10px 16px;border-radius:16px 16px 0 0;cursor:pointer;display:flex;justify-content:space-between;font-weight:700;font-size:.9em;">
+    <span>Ela - AI Helper 🤖</span><span id="ela-toggle">&#9650;</span>
+  </div>
+  <div id="ela-body" style="height:300px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;">
+    <div style="background:#e8f5e9;padding:10px;border-radius:12px;font-size:.85em;color:#2e7d32;">
+      Hi! I'm <b>Ela</b>, your AI helper! Ask me anything about the game, school, math, or just chat! 🤖
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;padding:10px;border-top:1px solid #c8e6c9;">
+    <input type="text" id="ela-input" placeholder="Ask Ela anything..." style="flex:1;padding:8px;border:2px solid #c8e6c9;border-radius:10px;font-family:inherit;font-size:.88em;outline:none;" onkeydown="if(event.key==='Enter')askEla()">
+    <button onclick="askEla()" style="padding:8px 14px;background:#43a047;color:white;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;">Ask</button>
+  </div>
+</div>
+
 <script>
 // ==================== STATE ====================
 const player={name:'',gender:'',age:0,personality:'',skin:'',hairEmoji:'',electives:[]};
@@ -902,6 +918,69 @@ function updatePlayerCount(){
 
 function updateLeaderboardMini(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-mini',false);updatePlayerCount();});}
 function showLeaderboard(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');});}
+
+// ==================== ELA AI BOT ====================
+function toggleEla(){
+  const p=document.getElementById('ela-panel');
+  const isMin=p.style.transform.includes('calc');
+  p.style.transform=isMin?'translateY(0)':'translateY(calc(100% - 44px))';
+  document.getElementById('ela-toggle').textContent=isMin?'\u25BC':'\u25B2';
+}
+
+function askEla(){
+  const inp=document.getElementById('ela-input');
+  const q=inp.value.trim();if(!q)return;inp.value='';
+  const body=document.getElementById('ela-body');
+
+  // Show user question
+  const ud=document.createElement('div');
+  ud.style.cssText='background:#e3f2fd;padding:8px 12px;border-radius:12px;font-size:.85em;color:#1565c0;align-self:flex-end;max-width:85%;';
+  ud.textContent=q;body.appendChild(ud);
+
+  // Generate Ela's answer
+  const answer=elaThink(q.toLowerCase());
+  const ad=document.createElement('div');
+  ad.style.cssText='background:#e8f5e9;padding:8px 12px;border-radius:12px;font-size:.85em;color:#2e7d32;align-self:flex-start;max-width:85%;';
+  ad.innerHTML='<b>Ela:</b> '+answer;
+  setTimeout(()=>{body.appendChild(ad);body.scrollTop=body.scrollHeight;},500);
+  body.scrollTop=body.scrollHeight;
+}
+
+function elaThink(q){
+  const info=getGradeInfo();
+  // Game help
+  if(q.includes('level'))return`You're on Level ${level} in ${info.grade} at ${info.school}! Keep playing to level up. Every 365 levels you move to the next grade! 🎮`;
+  if(q.includes('grade'))return`You're in ${info.grade}! You need to reach level ${(Math.floor(level/365)+1)*365} to move to the next grade. You got this! 📚`;
+  if(q.includes('college'))return`College starts at level 2920! That's after 12th grade. You're on level ${level} -- keep going! 🎓`;
+  if(q.includes('friend'))return`Your friendship level is ${Math.min(friendship,100)}%! Make good choices to keep it high. Be kind to Leni, Destiny, and the crew! 💕`;
+  if(q.includes('report')||q.includes('grade')||q.includes('score'))return`Your grades: Math ${grades.Math}%, Reading ${grades.Reading}%, Science ${grades.Science}%, Art ${grades.Art}%, Social Studies ${grades['Social Studies']}%. Get math questions right and make good choices to boost them! 📝`;
+  if(q.includes('f ')||q.includes('fail')||q.includes('game over'))return`If ALL your subjects drop to F (below 60%), it's game over! Answer math questions correctly and make good choices to keep your grades up! 📉`;
+  if(q.includes('math'))return`Math questions get harder as you level up and adapt to how you're doing. Getting them right boosts your Math grade! The first question is based on your age. 🧮`;
+  if(q.includes('challenge'))return`Every 40 levels is a CHALLENGE LEVEL! Wrong answers hurt DOUBLE on those. Be extra careful! ⚡`;
+  if(q.includes('leaderboard'))return`The leaderboard shows ALL players from every device! Keep leveling up to get to the top! 🏆`;
+  if(q.includes('leni'))return`Leni is shy, loves art, and is in Creative Arts. She gets on the Art Board every week! She also HATES the number 67 😣🎨`;
+  if(q.includes('destiny'))return`Destiny is 11, extrovert, has ADHD, and has an annoying big brother named James (15). She LOVES 67! 💅`;
+  if(q.includes('andre'))return`Andre is 11, the biggest troublemaker and flirt in 5th grade. He thinks he's the coolest. He also loves 67 😎`;
+  if(q.includes('james'))return`James is Destiny's annoying 15 year old brother in 10th grade. He shows up to embarrass her constantly 💀`;
+  if(q.includes('67'))return`67 67 67 67 67!! Everyone loves it except Leni -- she HATES it! 😣🗣️🔥`;
+  if(q.includes('admin'))return`The admin panel is locked with a secret code. Only the creator knows it! 🔒`;
+  if(q.includes('elective'))return`You picked ${player.electives[0]} and ${player.electives[1]}! Leni is in Creative Arts where she dominates the Art Board every week! 📚`;
+  if(q.includes('save'))return`Your progress saves automatically! Your avatar, level, grades, and everything is saved. Just come back and keep playing! 💾`;
+  if(q.includes('share'))return`Hit the Share button at the top to share the game with friends! The more players the better! 🔗`;
+  if(q.includes('who made')||q.includes('creator')||q.includes('who created'))return`This game was made in 2026 by an 11 year old with ADHD and autism! Check out their YouTube: Siena and Friends! 💜`;
+  if(q.includes('help'))return`I can help with: game tips, math help, character info, grade questions, or just chat! Ask me anything! 🤖`;
+  // Math help
+  if(q.includes('+')){try{const parts=q.match(/(\d+)\s*\+\s*(\d+)/);if(parts)return`${parts[1]} + ${parts[2]} = ${parseInt(parts[1])+parseInt(parts[2])} ✓`;}catch(e){}}
+  if(q.includes('-')){try{const parts=q.match(/(\d+)\s*-\s*(\d+)/);if(parts)return`${parts[1]} - ${parts[2]} = ${parseInt(parts[1])-parseInt(parts[2])} ✓`;}catch(e){}}
+  if(q.includes('x')||q.includes('*')){try{const parts=q.match(/(\d+)\s*[x*]\s*(\d+)/);if(parts)return`${parts[1]} x ${parts[2]} = ${parseInt(parts[1])*parseInt(parts[2])} ✓`;}catch(e){}}
+  // Fun responses
+  if(q.includes('hi')||q.includes('hello')||q.includes('hey'))return`Hey ${player.name}! How's ${info.grade} going? Need help with anything? 😊`;
+  if(q.includes('how are you'))return`I'm great! I'm an AI so I don't get tired 😄 How are YOU doing in ${info.grade}?`;
+  if(q.includes('joke'))return[`Why did the student eat their homework? Because their teacher told them it was a piece of cake! 😂`,`What's a math teacher's favorite season? SUM-mer! 🧮😂`,`Why was the math book sad? Because it had too many problems! 📚😂`][randInt(0,2)];
+  if(q.includes('thank'))return`You're welcome ${player.name}! I'm always here to help! 🤖💚`;
+  // Default
+  return`Hmm I'm not sure about that! Try asking me about: the game, characters (Leni, Destiny, Andre), grades, math help, levels, or just say hi! 🤖`;
+}
 
 // ==================== SHARE ====================
 function shareGame(){
