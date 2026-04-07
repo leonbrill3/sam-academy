@@ -719,14 +719,6 @@ function makeChoice(id){
   document.getElementById('game-choices').innerHTML=`<div style="text-align:center"><button class="btn" onclick="nextLevel()">Next Level →</button></div>`;
   updateReportCard();
 
-  const r=[
-    {from:'Destiny',text:['YESSS!! 💅','67 67 67 67 67','im DEAD 💀','SLAY','no cap FIRE 🔥','I CANT 😭','periodt.','67 67 67!!'][randInt(0,7)],cls:'destiny'},
-    {from:'Leni',text:['...that was nice... 🌸','...hehe...','...I liked that...','...thank you...','🎨','...stop saying 67 😣','...why does everyone love 67... I hate it...','...can we talk about art...'][randInt(0,7)],cls:'leni'},
-    {from:'Andre',text:['respect 😎','bet','smooth 67 67 67','not bad','67 67 67 67 67!! 🔥'][randInt(0,4)],cls:'andre'}
-  ];
-  setTimeout(()=>addChatMsg(r[0].from,r[0].text,r[0].cls),500);
-  setTimeout(()=>addChatMsg(r[1].from,r[1].text,r[1].cls),1400);
-  if(Math.random()>.3)setTimeout(()=>addChatMsg(r[2].from,r[2].text,r[2].cls),2200);
   saveToLeaderboard();
 }
 function nextLevel(){level++;saveProgress();showMathGate();}
@@ -745,22 +737,6 @@ function sendChat(){
   if(blocked.test(text)){addChatMsg('System','⚠️ Don\'t share personal info like phone numbers or emails! Stay safe!','');return;}
   const body=document.getElementById('chat-body');const d=document.createElement('div');
   d.className='chat-msg you';d.innerHTML=`<div class="chat-name">${player.name||'You'}</div>${text}`;body.appendChild(d);body.scrollTop=body.scrollHeight;
-  // Check if user said 67
-  const said67=text.includes('67');
-  setTimeout(()=>{
-    if(said67){
-      addChatMsg('Destiny','YESSS 67 67 67 67 67!! 🗣️🔥','destiny');
-      setTimeout(()=>addChatMsg('Leni','...I hate all of you. 😣','leni'),600);
-      setTimeout(()=>addChatMsg('Andre','67 67 67 67 67!! 😎','andre'),1000);
-    } else {
-      const replies=[
-        {from:'Destiny',text:['YESSS!!','lol WHAT','OMG','no way!! 💀','67 67 67 67 67','wait what 😭','say less','bet','frfr'][randInt(0,8)],cls:'destiny'},
-        {from:'Leni',text:['...oh...','...hehe...','...thats nice 🌸','...really?','...wow...','...finally someone NOT saying 67... thank you...'][randInt(0,5)],cls:'leni'},
-        {from:'Andre',text:['cool cool 😎','bet','67 67 67 67 67','nice','oh word?','smooth'][randInt(0,5)],cls:'andre'}
-      ];
-      const r=replies[randInt(0,2)];addChatMsg(r.from,r.text,r.cls);
-    }
-  },600+Math.random()*1200);
 }
 
 // ==================== ADMIN ====================
