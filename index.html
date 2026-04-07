@@ -687,13 +687,75 @@ const EVENTS=[
 ];
 
 function getDayName(){return DAYS[level%DAYS.length];}
+
+// ==================== GRADE LEVELS (school years) ====================
+// 365 levels = 1 school year. 5th grade -> college
+function getGradeInfo(){
+  const yr=Math.floor(level/365); // 0=5th, 1=6th, 2=7th... 7=12th, 8+=college
+  const grades=['5th Grade','6th Grade','7th Grade','8th Grade','9th Grade (Freshman)','10th Grade (Sophomore)','11th Grade (Junior)','12th Grade (Senior)'];
+  if(yr>=8)return{grade:'College',school:'University',emoji:'🎓',year:yr-7};
+  if(yr>=4)return{grade:grades[yr],school:'S.A.M. High School',emoji:'🏫',year:0};
+  return{grade:grades[yr],school:'S.A.M. Academy',emoji:'🏫',year:0};
+}
+
+function checkGradeUp(){
+  // Check if player just leveled up to a new grade
+  if(level>0&&level%365===0){
+    const info=getGradeInfo();
+    const prev=Math.floor((level-1)/365);
+    const prevGrades=['5th Grade','6th Grade','7th Grade','8th Grade','9th Grade','10th Grade','11th Grade','12th Grade'];
+    const prevG=prev>=8?'College Year '+(prev-7):prevGrades[prev];
+    // Show level-up screen
+    document.getElementById('game-story').innerHTML=`
+      <div class="story-box" style="text-align:center;font-size:1.1em;">
+        <h2 style="color:#ad1457;font-size:1.5em;">🎉 GRADE UP!! 🎉</h2>
+        <p style="font-size:1.3em;margin:12px 0;">${prevG} ➡️ <b>${info.grade}</b></p>
+        <p>${info.emoji} Welcome to <b>${info.school}</b>!</p>
+        ${info.grade==='College'?'<p style="margin-top:10px;">You made it to COLLEGE!! ${player.name} graduated from S.A.M. Academy!! 🎓🎉</p>':''}
+        <br>
+        <span class="speaker destiny">Destiny:</span> WE LEVELED UP!! ${info.grade}!! 67 67 67 67 67!! 🎉🎉
+        <br><br>
+        <span class="speaker leni">Leni:</span> ...we did it... together... <em>*happy tears*</em> ...also please stop saying 67 even on this special day 😣
+        <br><br>
+        <span class="speaker andre">Andre:</span> ${info.grade}?? I'm basically an adult now 😎 67 67 67 67 67
+      </div>`;
+    document.getElementById('game-choices').innerHTML=`<div style="text-align:center"><button class="btn" onclick="nextLevel()">Start ${info.grade}! →</button></div>`;
+    return true;
+  }
+  return false;
+}
+
+// Challenge levels -- every 40th level is harder with tougher choices
+function isChallengeLevel(){return level>0&&level%40===0;}
+
 function renderLevel(){
-  document.getElementById('level-badge').textContent='Level '+level;
-  document.getElementById('day-label').textContent=getDayName()+' -- Week '+Math.ceil(level/5);
-  document.getElementById('game-player-card').innerHTML=`<b>${player.name}</b> | ${player.gender} | Age ${player.age} | ${player.personality} | Level ${level} | Electives: <b>${player.electives[0]}</b> & <b>${player.electives[1]}</b>`;
+  const info=getGradeInfo();
+  document.getElementById('level-badge').textContent='Level '+level+' | '+info.grade;
+  document.getElementById('day-label').textContent=getDayName()+' -- Week '+Math.ceil((level%365)/5)+' | '+info.school;
+  document.getElementById('game-player-card').innerHTML=`<b>${player.name}</b> | ${player.gender} | Age ${player.age} | ${player.personality} | Level ${level} | ${info.grade} | Electives: <b>${player.electives[0]}</b> & <b>${player.electives[1]}</b>`;
   const evt=EVENTS[level%EVENTS.length];const data=evt.gen();window._evt=evt;window._data=data;
-  let html='';data.story.forEach(s=>{html+=`<div class="story-box"><span class="speaker ${s.cls||''}">${s.speaker}:</span> ${s.text}</div>`;});
-  if(data.artBoard)html+=`<div class="art-board"><div class="art-board-title">S.A.M. Academy Art Board -- Best Piece of the Week 🎨</div><p>${data.artBoard.text}</p></div>`;
+  let html='';
+
+  // Challenge level banner
+  if(isChallengeLevel()){
+    html+=`<div style="background:linear-gradient(135deg,#ff6f00,#e65100);color:white;border-radius:14px;padding:14px;margin:12px 0;text-align:center;font-weight:700;">⚡ CHALLENGE LEVEL ⚡<br>This one is harder! Choose wisely -- wrong answers hurt MORE!</div>`;
+  }
+
+  // After level 40, add extra story context for longer levels
+  if(level>40){
+    const info=getGradeInfo();
+    const extras=[
+      `The halls of ${info.school} are buzzing with energy today.`,
+      `Another day at ${info.school} -- ${info.grade} is wild.`,
+      `${info.grade} at ${info.school} hits different.`,
+      `Everyone in ${info.grade} is talking about what happened yesterday.`,
+      `It's a big day for ${info.grade} students at ${info.school}.`
+    ];
+    html+=`<div class="story-box"><span class="speaker">Narrator:</span> ${extras[level%extras.length]}</div>`;
+  }
+
+  data.story.forEach(s=>{html+=`<div class="story-box"><span class="speaker ${s.cls||''}">${s.speaker}:</span> ${s.text}</div>`;});
+  if(data.artBoard)html+=`<div class="art-board"><div class="art-board-title">${getGradeInfo().school} Art Board -- Best Piece of the Week 🎨</div><p>${data.artBoard.text}</p></div>`;
   document.getElementById('game-story').innerHTML=html;
   const ch=document.getElementById('game-choices');ch.innerHTML='';
   data.choices.forEach(c=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=c.text;b.onclick=()=>makeChoice(c.id);ch.appendChild(b);});
@@ -704,13 +766,15 @@ function makeChoice(id){
   const resp=window._evt.respond(id);
   const isWrong=resp.wrong||false;
 
+  const challenge=isChallengeLevel();
   if(isWrong){
-    // WRONG CHOICE -- lose friendship and grades drop
-    friendship=Math.max(0,friendship-(resp.pts||10));
+    // WRONG CHOICE -- lose friendship and grades drop (more on challenge levels)
+    const mult=challenge?2:1;
+    friendship=Math.max(0,friendship-(resp.pts||10)*mult);
     const dropSubj=SUBJECTS[randInt(0,SUBJECTS.length-1)];
-    grades[dropSubj]=Math.max(0,grades[dropSubj]-randInt(5,12));
+    grades[dropSubj]=Math.max(0,grades[dropSubj]-randInt(5,12)*mult);
     const dropSubj2=SUBJECTS[randInt(0,SUBJECTS.length-1)];
-    grades[dropSubj2]=Math.max(0,grades[dropSubj2]-randInt(3,8));
+    grades[dropSubj2]=Math.max(0,grades[dropSubj2]-randInt(3,8)*mult);
   } else {
     // RIGHT CHOICE -- gain friendship and grades boost
     friendship+=resp.pts||20;if(friendship>100)friendship=100;
@@ -730,7 +794,16 @@ function makeChoice(id){
 
   saveToLeaderboard();
 }
-function nextLevel(){level++;saveProgress();showMathGate();}
+function nextLevel(){
+  level++;saveProgress();
+  // Check for grade-up (every 365 levels)
+  if(level%365===0){
+    goToScene('scene-game');
+    checkGradeUp();
+    return;
+  }
+  showMathGate();
+}
 function updateGameMeter(){const f=Math.min(friendship,100);const fill=document.getElementById('meter-game');if(fill)fill.style.width=f+'%';const h=document.getElementById('hearts-game');if(h){const full=Math.floor(f/20);h.textContent='\u2764\uFE0F'.repeat(full)+'\uD83E\uDD0D'.repeat(5-full);}}
 
 // ==================== CHAT ====================
