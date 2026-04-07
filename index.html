@@ -788,9 +788,6 @@ function updatePlayerCount(){
 function updateLeaderboardMini(){saveToLeaderboard();renderLB('lb-table-mini',false);updatePlayerCount();}
 function showLeaderboard(){saveToLeaderboard();renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');}
 
-// Update count on page load
-updatePlayerCount();
-
 // ==================== SHARE ====================
 function shareGame(){
   const url='https://sam-academy.onrender.com';
@@ -798,15 +795,19 @@ function shareGame(){
   if(navigator.share){
     navigator.share({title:'S.A.M. Academy',text:text,url:url});
   } else {
-    navigator.clipboard.writeText(url).then(()=>{
-      alert('Link copied! Share it with your friends!\n\n'+url);
-    }).catch(()=>{
-      prompt('Copy this link and share it with your friends:',url);
-    });
+    try{
+      navigator.clipboard.writeText(url).then(()=>{
+        alert('Link copied! Share it with your friends!\n\n'+url);
+      }).catch(()=>{
+        prompt('Copy this link and share it with your friends:',url);
+      });
+    }catch(e){prompt('Copy this link:',url);}
   }
 }
 
-// AUTO-LOAD SAVED GAME (runs last after everything is defined)
+// ==================== RUN ON PAGE LOAD ====================
+try{updatePlayerCount();}catch(e){}
+
 try{
   if(loadProgress()){
     document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
@@ -815,7 +816,7 @@ try{
     showMathGate();
   }
 }catch(e){
-  // If auto-load fails, make sure rules screen shows
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
   document.getElementById('scene-rules').classList.add('active');
 }
 </script>
