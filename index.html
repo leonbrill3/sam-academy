@@ -336,6 +336,13 @@ const db=firebase.firestore();
     <div style="text-align:center;margin-top:4px;font-size:.8em;color:#1565c0;" id="grade-streak"></div>
   </div>
 
+  <!-- LANYARD STICKERS -->
+  <div id="lanyard" style="background:linear-gradient(135deg,#fff9c4,#fff3e0);border:2px solid #ffe082;border-radius:14px;padding:12px;margin:10px 0;text-align:center;">
+    <div style="font-weight:700;color:#e65100;font-size:.9em;margin-bottom:6px;">My Lanyard 🏷️</div>
+    <div id="sticker-display" style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;font-size:1.4em;"></div>
+    <div id="next-sticker" style="font-size:.75em;color:#e65100;margin-top:4px;"></div>
+  </div>
+
   <div class="friendship-meter">
     <div class="meter-label">Friendship Level</div>
     <div class="meter-bar"><div class="meter-fill" id="meter-game" style="width:10%"></div></div>
@@ -777,6 +784,7 @@ function renderLevel(){
   data.choices.forEach(c=>{const b=document.createElement('button');b.className='choice-btn';b.textContent=c.text;b.onclick=()=>makeChoice(c.id);ch.appendChild(b);});
   updateGameMeter();
   updateReportCard();
+  updateLanyard();
 }
 function makeChoice(id){
   const resp=window._evt.respond(id);
@@ -919,6 +927,50 @@ function updatePlayerCount(){
 function updateLeaderboardMini(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-mini',false);updatePlayerCount();});}
 function showLeaderboard(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');});}
 
+// ==================== LANYARD STICKERS ====================
+const STICKERS=[
+  {level:10,emoji:'😊',name:'Smiley Face'},
+  {level:25,emoji:'⭐',name:'Gold Star'},
+  {level:40,emoji:'⚡',name:'Challenge Survivor'},
+  {level:50,emoji:'🎨',name:'Art Star'},
+  {level:75,emoji:'📚',name:'Bookworm'},
+  {level:100,emoji:'💯',name:'Level 100!'},
+  {level:150,emoji:'🔥',name:'On Fire'},
+  {level:200,emoji:'🏆',name:'Champion'},
+  {level:250,emoji:'💎',name:'Diamond'},
+  {level:300,emoji:'🌟',name:'Superstar'},
+  {level:365,emoji:'🎓',name:'6th Grade!'},
+  {level:500,emoji:'🚀',name:'Rocket'},
+  {level:730,emoji:'🎓',name:'7th Grade!'},
+  {level:1000,emoji:'👑',name:'1000 Club'},
+  {level:1095,emoji:'🎓',name:'8th Grade!'},
+  {level:1460,emoji:'🏫',name:'High School!'},
+  {level:1825,emoji:'🎓',name:'Sophomore!'},
+  {level:2000,emoji:'🌈',name:'2000 Legend'},
+  {level:2190,emoji:'🎓',name:'Junior!'},
+  {level:2555,emoji:'🎓',name:'Senior!'},
+  {level:2920,emoji:'🎓',name:'COLLEGE!!'}
+];
+
+function updateLanyard(){
+  const sd=document.getElementById('sticker-display');
+  const ns=document.getElementById('next-sticker');
+  if(!sd)return;
+  sd.innerHTML='';
+  let earned=0;
+  STICKERS.forEach(s=>{
+    if(level>=s.level){
+      sd.innerHTML+=`<span title="${s.name}" style="cursor:default;">${s.emoji}</span>`;
+      earned++;
+    }
+  });
+  if(earned===0)sd.innerHTML='<span style="font-size:.8em;color:#999;">No stickers yet -- keep playing!</span>';
+  // Show next sticker to earn
+  const next=STICKERS.find(s=>level<s.level);
+  if(next)ns.textContent=`Next sticker: ${next.emoji} "${next.name}" at level ${next.level} (${next.level-level} to go!)`;
+  else ns.textContent='You earned ALL stickers!! 👑';
+}
+
 // ==================== ELA AI BOT ====================
 function toggleEla(){
   const p=document.getElementById('ela-panel');
@@ -967,6 +1019,7 @@ function elaThink(q){
   if(q.includes('elective'))return`You picked ${player.electives[0]} and ${player.electives[1]}! Leni is in Creative Arts where she dominates the Art Board every week! 📚`;
   if(q.includes('save'))return`Your progress saves automatically! Your avatar, level, grades, and everything is saved. Just come back and keep playing! 💾`;
   if(q.includes('share'))return`Hit the Share button at the top to share the game with friends! The more players the better! 🔗`;
+  if(q.includes('sticker')||q.includes('lanyard')){const next=STICKERS.find(s=>level<s.level);return next?`You earn stickers on your lanyard at special levels! Next sticker: ${next.emoji} "${next.name}" at level ${next.level}! 🏷️`:`You earned ALL the stickers!! You're a legend!! 👑`;}
   if(q.includes('who made')||q.includes('creator')||q.includes('who created'))return`This game was made in 2026 by an 11 year old with ADHD and autism! Check out their YouTube: Siena and Friends! 💜`;
   if(q.includes('help'))return`I can help with: game tips, math help, character info, grade questions, or just chat! Ask me anything! 🤖`;
   // Math help
