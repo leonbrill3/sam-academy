@@ -7,6 +7,20 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta name="referrer" content="no-referrer">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDhOlOO3zuG902wTqAtnbCu8sA39wu3v7M",
+  authDomain:"sam-academy-ab135.firebaseapp.com",
+  projectId:"sam-academy-ab135",
+  storageBucket:"sam-academy-ab135.firebasestorage.app",
+  messagingSenderId:"492136366856",
+  appId:"1:492136366856:web:500f8739f6d838c38ce2bd"
+});
+const db=firebase.firestore();
+</script>
 <title>S.A.M. Academy - Best Friends Forever</title>
 <!-- PWA - Makes it work like a real app -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -750,15 +764,40 @@ function showAdmin(){
 }
 function resetGame(){if(confirm('Reset ALL progress? fr fr?')){localStorage.removeItem('sam_save');localStorage.removeItem('sam_leaderboard');location.reload();}}
 
-// ==================== LEADERBOARD ====================
+// ==================== LEADERBOARD (FIREBASE) ====================
 function saveToLeaderboard(){
+  if(!player.name)return;
+  // Save to Firebase
+  try{
+    db.collection('players').doc(player.name).set({
+      name:player.name,level:level,friendship:Math.min(friendship,100),
+      gender:player.gender,age:player.age,updatedAt:new Date().toISOString()
+    },{merge:true});
+  }catch(e){}
+  // Also save locally as backup
   let lb=JSON.parse(localStorage.getItem('sam_leaderboard')||'[]');
   const ex=lb.find(e=>e.name===player.name);
   if(ex){ex.level=Math.max(ex.level,level);ex.friendship=Math.min(friendship,100);}
   else lb.push({name:player.name,level,friendship:Math.min(friendship,100)});
   lb.sort((a,b)=>b.level-a.level);localStorage.setItem('sam_leaderboard',JSON.stringify(lb));
 }
-function getLeaderboard(){return JSON.parse(localStorage.getItem('sam_leaderboard')||'[]').sort((a,b)=>b.level-a.level);}
+
+let cachedLB=[];
+function loadFirebaseLB(callback){
+  try{
+    db.collection('players').orderBy('level','desc').limit(25).get().then(snap=>{
+      cachedLB=[];
+      snap.forEach(doc=>cachedLB.push(doc.data()));
+      if(callback)callback();
+    }).catch(()=>{if(callback)callback();});
+  }catch(e){if(callback)callback();}
+}
+
+function getLeaderboard(){
+  if(cachedLB.length>0)return cachedLB;
+  return JSON.parse(localStorage.getItem('sam_leaderboard')||'[]').sort((a,b)=>b.level-a.level);
+}
+
 function renderLB(tableId,showF){
   const lb=getLeaderboard();const tbody=document.querySelector('#'+tableId+' tbody');tbody.innerHTML='';
   if(lb.length===0){
@@ -769,18 +808,27 @@ function renderLB(tableId,showF){
   }
   lb.slice(0,15).forEach((e,i)=>{const isYou=e.name===player.name;const tr=document.createElement('tr');if(isYou)tr.className='you';let c=`<td style="font-weight:700;color:#e65100">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</td><td>${e.name}${isYou?' (YOU)':''}</td><td>Level ${e.level}</td>`;if(showF)c+=`<td>${e.friendship}%</td>`;tr.innerHTML=c;tbody.appendChild(tr);});
 }
+
 function updatePlayerCount(){
-  const lb=getLeaderboard();
-  const count=lb.length;
-  const el=document.getElementById('player-count');
-  if(!el)return;
-  const goal=Math.max(25,Math.ceil(count/25)*25);
-  el.textContent=count+' / '+goal+' players';
+  try{
+    db.collection('players').get().then(snap=>{
+      const count=snap.size;
+      const el=document.getElementById('player-count');
+      if(!el)return;
+      const goal=Math.max(25,Math.ceil(count/25)*25);
+      el.textContent=count+' / '+goal+' players';
+    }).catch(()=>{
+      const el=document.getElementById('player-count');
+      if(el)el.textContent='0 / 25 players';
+    });
+  }catch(e){
+    const el=document.getElementById('player-count');
+    if(el)el.textContent='0 / 25 players';
+  }
 }
-// Clear old fake data on load
-(function(){const lb=JSON.parse(localStorage.getItem('sam_leaderboard')||'[]');const clean=lb.filter(e=>!['Leni','Destiny','Andre','CoolKid2011','ArtGurl','MathWiz67','67squad'].includes(e.name));localStorage.setItem('sam_leaderboard',JSON.stringify(clean));})();
-function updateLeaderboardMini(){saveToLeaderboard();renderLB('lb-table-mini',false);updatePlayerCount();}
-function showLeaderboard(){saveToLeaderboard();renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');}
+
+function updateLeaderboardMini(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-mini',false);updatePlayerCount();});}
+function showLeaderboard(){saveToLeaderboard();loadFirebaseLB(()=>{renderLB('lb-table-full',true);updatePlayerCount();goToScene('scene-leaderboard');});}
 
 // ==================== SHARE ====================
 function shareGame(){
