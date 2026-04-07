@@ -158,8 +158,8 @@
   </div>
 
   <div class="checkbox-row">
-    <input type="checkbox" id="rules-check" onchange="document.getElementById('rules-btn').disabled=!this.checked">
-    <label for="rules-check" style="margin:0;cursor:pointer;">I have read and accept the rules</label>
+    <input type="checkbox" id="rules-check" onchange="document.getElementById('rules-btn').disabled=!this.checked" style="width:24px;height:24px;accent-color:#ab47bc;">
+    <label for="rules-check" style="margin:0;cursor:pointer;font-size:1em;">I have read and accept the rules</label>
   </div>
 
   <div style="text-align:center">
@@ -453,6 +453,7 @@ function updateReportCard(){
   document.getElementById('grade-display').innerHTML=`Overall: <span style="color:${overall.color}">${overall.letter} (${Math.round(avg)}%)</span>`;
   // Streak display
   const gs=document.getElementById('grade-streak');
+  if(!gs)return;
   if(mathStreak>=3)gs.textContent='🔥 '+mathStreak+' correct in a row! Difficulty increasing!';
   else if(mathWrong>=2)gs.textContent='📉 Struggling? Questions getting easier -- you got this!';
   else gs.textContent='';
@@ -743,7 +744,7 @@ function sendChat(){
 function showAdminGate(){document.getElementById('admin-code-input').value='';document.getElementById('admin-code-result').textContent='';goToScene('scene-admin-gate');}
 function checkAdminCode(){
   const code=document.getElementById('admin-code-input').value.replace(/\s/g,'');
-  if(code===ADMIN_CODE){showAdmin();}else{document.getElementById('admin-code-result').textContent='Wrong code! hint: 67 67 67 67 67 💀';}
+  if(code===ADMIN_CODE){showAdmin();}else{document.getElementById('admin-code-result').textContent='Wrong code! 🔒';}
 }
 function showAdmin(){
   document.getElementById('admin-profile').innerHTML=`<div class="admin-row">👤 <b>Name:</b> ${player.name}</div><div class="admin-row">⚧ <b>Gender:</b> ${player.gender}</div><div class="admin-row">🎂 <b>Age:</b> ${player.age}</div><div class="admin-row">💭 <b>Personality:</b> ${player.personality}</div><div class="admin-row">📚 <b>Electives:</b> ${player.electives.join(', ')}</div>`;
@@ -753,7 +754,7 @@ function showAdmin(){
   else{let ph='';lb.forEach(p=>{ph+=`<div class="admin-row">👤 <b>${p.name}</b> -- Level ${p.level} -- Friendship ${p.friendship}%</div>`;});document.getElementById('admin-players').innerHTML=ph;}
   goToScene('scene-admin');
 }
-function resetGame(){if(confirm('Reset ALL progress? fr fr?')){localStorage.removeItem('sam_leaderboard');location.reload();}}
+function resetGame(){if(confirm('Reset ALL progress? fr fr?')){localStorage.removeItem('sam_save');localStorage.removeItem('sam_leaderboard');location.reload();}}
 
 // ==================== LEADERBOARD ====================
 function saveToLeaderboard(){
@@ -806,14 +807,16 @@ function shareGame(){
 }
 
 // AUTO-LOAD SAVED GAME (runs last after everything is defined)
-if(loadProgress()){
-  // Remove the rules screen that shows by default
-  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
-  document.getElementById('chat-panel').classList.remove('hidden','minimized');
-  document.getElementById('chat-body').innerHTML='';
-  // Go straight to the game
-  goToScene('scene-math');
-  showMathGate();
+try{
+  if(loadProgress()){
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+    document.getElementById('chat-panel').classList.remove('hidden','minimized');
+    document.getElementById('chat-body').innerHTML='';
+    showMathGate();
+  }
+}catch(e){
+  // If auto-load fails, make sure rules screen shows
+  document.getElementById('scene-rules').classList.add('active');
 }
 </script>
 </body>
