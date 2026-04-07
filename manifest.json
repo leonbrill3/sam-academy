@@ -1,0 +1,17 @@
+{
+  "name": "S.A.M. Academy",
+  "short_name": "S.A.M.",
+  "description": "A fun school friendship game - created by an 11 year old",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fce4ec",
+  "theme_color": "#ab47bc",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%23ab47bc'/><text y='320' x='256' text-anchor='middle' font-size='200' font-weight='bold' fill='white'>SAM</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
